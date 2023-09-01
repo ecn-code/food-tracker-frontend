@@ -21,6 +21,9 @@ jobs:
       - node/install-packages:
           cache-path: ~/project/node_modules
           override-ci-command: npm install
+      - run: rm .env
+      - run: echo $VITE_BD > .env
+      - run: cat .env
       - run: CI=false npm run build
       - store_artifacts:
           path: /home/circleci/.npm/_logs/
