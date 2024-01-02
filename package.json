@@ -30,7 +30,7 @@
     "nightwatch": "^3.1.2",
     "ts-node": "^10.9.1",
     "vite": "^4.4.9",
-    "vite-plugin-vuetify": "^2.0.1",
+    "vite-plugin-vuetify": "^1.0.2",
     "vue-cli-plugin-vuetify": "~2.5.8",
     "wait-on": "^7.0.1"
   }
