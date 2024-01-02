@@ -1,17 +1,25 @@
 <template>
-  <div class="container-fluid d-flex flex-column min-vh-100 justify-content-center align-items-center">
-    <form v-on:submit.prevent="login">
-      <div class="form-outline mb-4">
-        <input :disabled="loading" placeholder="Username" class="form-control" v-model="username" />
-      </div>
+  <v-container fluid class="fill-height">
+    <v-row>
+      <v-col>
+        <v-card class="elevation-12">
+          <v-toolbar dark color="primary">
+            <v-toolbar-title>Login</v-toolbar-title>
+          </v-toolbar>
+          <v-card-text>
+            <form ref="form" @submit.prevent="login">
+              <v-text-field :disabled="loading" v-model="username" name="username" label="Username" type="text" placeholder="username"
+                required></v-text-field>
 
-      <div class="form-outline mb-4">
-        <input :disabled="loading" placeholder="Password" type="password" class="form-control" v-model="password" />
-      </div>
-
-      <button :disabled="loading" v-if="isUsernameAndPasswordFilled" @click="login" type="submit" class="btn btn-primary btn-block w-100">{{ loginButtonText }}</button>
-    </form>
-  </div>
+              <v-text-field :disabled="loading" v-model="password" name="password" label="Password" type="password" placeholder="password"
+                required></v-text-field>
+              <v-btn :disabled="loading" v-if="isUsernameAndPasswordFilled" type="submit" class="mt-4" color="primary" value="log in">{{ loginButtonText }}</v-btn>
+            </form>
+          </v-card-text>
+        </v-card>
+      </v-col>
+    </v-row>
+  </v-container>
 </template>
 
 <script setup>
@@ -21,7 +29,7 @@ import router from '../router';
 import { useUserStore } from '../stores/user';
 
 const userStore = useUserStore();
-const { setUser } = userStore;
+const { setUser, isAuth } = userStore;
 
 const loginService = new LoginService;
 const username = ref('');
@@ -48,7 +56,7 @@ const success = (data) => {
     token: data.token,
     username: username.value
   });
-  router.push({name: 'home'});
+  router.push({ name: 'home' });
 };
 const error = (data) => {
   console.error(data);
@@ -59,6 +67,10 @@ const error = (data) => {
 const isUsernameAndPasswordFilled = computed(() => {
   return username.value != '' && password.value != '';
 });
+
+if (isAuth) {
+  router.push({ name: 'home' });
+}
 </script>
 
 <style></style>

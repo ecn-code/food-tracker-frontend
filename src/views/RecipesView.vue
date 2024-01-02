@@ -1,6 +1,9 @@
 <template>
     <LayoutBase>
-        Recipes
+        <template v-slot:content>
+            Recipes
+            https://vuetifyjs.com/en/components/data-iterators/#slots
+        </template>
     </LayoutBase>
 </template>
 

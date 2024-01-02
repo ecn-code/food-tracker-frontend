@@ -1,6 +1,8 @@
 <template>
     <LayoutBase>
-        Nutritional values
+        <template v-slot:content>
+            Nutritional values
+        </template>
     </LayoutBase>
 </template>
 

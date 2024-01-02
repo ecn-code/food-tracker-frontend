@@ -1,6 +1,8 @@
 <template>
     <LayoutBase>
-        Products
+        <template v-slot:content>
+            Products
+        </template>
     </LayoutBase>
 </template>
 

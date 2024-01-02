@@ -1,6 +1,8 @@
 <template>
     <LayoutBase>
-        Recipes
+        <template v-slot:content>
+            Menus
+        </template>
     </LayoutBase>
 </template>
 
