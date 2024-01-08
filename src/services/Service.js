@@ -3,11 +3,11 @@ import { useUserStore } from '../stores/user';
 
 export default class Service {
 
-    async fetchData(uri, options) {
+    async fetchData(uri, options, queryParams = {}) {
         try {
 
             const response = await fetch(
-                import.meta.env.VITE_BD + uri,
+                import.meta.env.VITE_BD + uri + '?' + new URLSearchParams(queryParams),
                 options
             );
 

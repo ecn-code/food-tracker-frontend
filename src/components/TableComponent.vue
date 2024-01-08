@@ -1,10 +1,13 @@
 <template>
-    <v-data-table-server v-model:items-per-page="itemsPerPage" :items-length="totalItems" @update:options="get"
-        :loading="loading" :headers="headers" :items="items" :sort-by="sortBy">
+    <v-data-table-virtual class="fill-height" @update:options="get" :loading="loading" :headers="headers" :items="items"
+        :sort-by="sortBy">
+        <template v-for="slotCell in slotCells" v-slot:[slotCell]="{ item }">
+            <slot :name="slotCell" :item="item"></slot>
+        </template>
         <template v-slot:top>
             <v-toolbar flat>
                 <v-toolbar-title>{{ title }}</v-toolbar-title>
-                <v-dialog v-model="dialog" max-width="500px">
+                <v-dialog @click:outside="close" v-model="dialog" max-width="500px">
                     <template v-slot:activator="{ props }">
                         <v-btn color="primary" dark class="mb-2" @click="add">
                             Add
@@ -61,13 +64,11 @@
                 Reset
             </v-btn>
         </template>
-    </v-data-table-server>
+    </v-data-table-virtual>
 </template>
 
 <script setup>
-import { ref, defineProps, defineEmits, defineExpose, nextTick, computed } from 'vue';
-
-const itemsPerPage = ref(10);
+import { ref, nextTick, computed } from 'vue';
 
 const loading = ref(false);
 const dialog = ref(false);
@@ -79,7 +80,6 @@ const saving = defineModel('saving');
 const validationMessage = defineModel('validationMessage');
 const formRef = ref(null);
 const items = ref([]);
-const totalItems = ref(0);
 const item = defineModel('item');
 const id = ref(null);
 
@@ -89,14 +89,16 @@ const {
     sortBy,
     idName,
     emptyItem,
-    title
+    title,
+    slotCells
 } = defineProps([
     'headers',
     'service',
     'sortBy',
     'idName',
     'emptyItem',
-    'title'
+    'title',
+    'slotCells'
 ]);
 
 const formTitle = computed(() => {
@@ -106,34 +108,35 @@ const saveBtnText = computed(() => {
     return saving.value ? 'saving...' : 'save';
 });
 
-const emit = defineEmits(['on-save']);
+const emit = defineEmits(['on-edit', 'before-save', 'close']);
 
-const get = async ({ page, itemsPerPage, sortBy }) => {
+const get = async () => {
     loading.value = true;
 
     const response = await service.get();
     if (response.isOk) {
-        items.value = response.data;
+        items.value = response.data.items;
         loading.value = false;
-        totalItems.value = items.value.length;
     }
 };
 
 const add = () => {
     dialog.value = true;
     nextTick(() => {
-        formRef.value.querySelector('.v-form [tabindex="1"]')?.focus();
+        formRef.value?.querySelector('.v-form')?.querySelector('[tabindex="1"]')?.focus();
     });
 };
 
 const edit = itemSelected => {
     editing.value = true;
-    item.value = Object.assign({}, itemSelected)
+    item.value = Object.assign({}, itemSelected);
     id.value = itemSelected[idName];
     dialog.value = true;
+    emit('on-edit');
 };
 
 const save = async () => {
+    emit('before-save');
     loading.value = true;
     saving.value = true;
     validationMessage.value = null;
@@ -180,6 +183,7 @@ const close = (callback) => {
         editing.value = false;
         saving.value = false;
         id.value = null;
+        emit('close');
     });
 };
 

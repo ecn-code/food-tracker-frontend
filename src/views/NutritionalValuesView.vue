@@ -61,7 +61,7 @@ const validationMessage = ref(null);
 const getUnits = async () => {
     const response = await unitService.get();
     if (response.isOk) {
-        units.value = response.data;
+        units.value = response.data.items;
     } else {
         alert('Error retrieving units');
     }
