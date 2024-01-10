@@ -13,7 +13,7 @@
                             Add
                         </v-btn>
                     </template>
-                    <div ref="formRef">
+                    <div style="overflow: auto;" ref="formRef">
                         <v-form v-model="form" @submit.prevent="save">
                             <v-card>
                                 <v-card-title>
