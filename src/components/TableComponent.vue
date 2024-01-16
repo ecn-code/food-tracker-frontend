@@ -7,9 +7,10 @@
         <template v-slot:top>
             <v-toolbar flat>
                 <v-toolbar-title>{{ title }}</v-toolbar-title>
+                <slot name="toolbar"></slot>
                 <v-dialog @click:outside="close" v-model="dialog" max-width="500px">
                     <template v-slot:activator="{ props }">
-                        <v-btn color="primary" dark class="mb-2" @click="add">
+                        <v-btn :disabled="loading" color="primary" dark class="mb-2" @click="add">
                             Add
                         </v-btn>
                     </template>
@@ -71,9 +72,8 @@
 </template>
 
 <script setup>
-import { ref, nextTick, computed } from 'vue';
+import { ref, nextTick, computed, watch } from 'vue';
 
-const loading = ref(false);
 const dialog = ref(false);
 const dialogRemove = ref(false);
 const form = ref(false);
@@ -84,6 +84,8 @@ const validationMessage = defineModel('validationMessage');
 const formRef = ref(null);
 const items = ref([]);
 const item = defineModel('item');
+const reload = defineModel('reload');
+const loading = defineModel('loading');
 
 const {
     headers,
@@ -93,7 +95,7 @@ const {
     emptyItem,
     title,
     slotCells,
-    canDuplicate
+    canDuplicate,
 } = defineProps({
     headers: Array,
     service: Object,
@@ -102,7 +104,7 @@ const {
     emptyItem: Object,
     title: String,
     slotCells: Array,
-    canDuplicate: { type: Boolean, required: false, default: false }
+    canDuplicate: { type: Boolean, required: false, default: false },
 });
 
 const formTitle = computed(() => {
@@ -111,8 +113,9 @@ const formTitle = computed(() => {
 const saveBtnText = computed(() => {
     return saving.value ? 'saving...' : 'save';
 });
+watch(reload, () => get());
 
-const emit = defineEmits(['on-edit', 'before-save', 'on-close', 'before-remove']);
+const emit = defineEmits(['on-edit', 'on-duplicate', 'before-save', 'on-close', 'before-remove']);
 
 const get = async () => {
     loading.value = true;
@@ -142,6 +145,7 @@ const duplicate = itemSelected => {
     dialog.value = true;
     item.value = Object.assign({}, itemSelected);
     dialog.value = true;
+    emit('on-duplicate');
 };
 
 const save = async () => {

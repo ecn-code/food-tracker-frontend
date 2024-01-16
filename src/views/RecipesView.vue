@@ -27,6 +27,7 @@
                                         :items="products" :disabled="saving" :item-props="productProps" tabindex="3"
                                         multiple label="Products"></v-select>
                                 </v-col>
+                                <v-divider></v-divider>
                                 <v-col cols="12" v-for="product in editedProducts">
                                     <v-text-field :rules="[rules.required]" v-model="product[0]" :disabled="true"
                                         label="Name"></v-text-field>
@@ -63,6 +64,10 @@ const headers = [
     { title: 'Actions', key: 'actions', sortable: false },
 ];
 const productProps = product => {
+    if(!product.name) {
+        alert('Error con producto que posiblemente fue eliminado y esta asociado');
+    }
+
     return {
         title: product.name,
     };

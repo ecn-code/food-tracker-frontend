@@ -28,6 +28,7 @@
                                         :item-props="nutritionalProps" tabindex="3" multiple
                                         label="Nutritional Values"></v-select>
                                 </v-col>
+                                <v-divider></v-divider>
                                 <v-col cols="12" v-for="nutritionalValue in editedNutritionalValues">
                                     <v-text-field :rules="[rules.required]" v-model="nutritionalValue[0]" :disabled="true"
                                         label="Name"></v-text-field>

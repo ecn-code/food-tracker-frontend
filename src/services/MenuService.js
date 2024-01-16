@@ -36,12 +36,17 @@ export default class MenuService extends Service {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
                 }
-            },
-            {
-                isLocked: false
             }
         );
     };
+
+    async lock(date) {
+        return await this.fetchWithBody(
+            this.RESOURCE + '/lock',
+            'POST',
+            JSON.stringify({date: date})
+        );
+    }
 
     async add(menu) {
         return await this.fetchWithBody(
