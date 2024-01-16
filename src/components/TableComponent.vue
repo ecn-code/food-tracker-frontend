@@ -113,7 +113,7 @@ const formTitle = computed(() => {
 const saveBtnText = computed(() => {
     return saving.value ? 'saving...' : 'save';
 });
-watch(reload, () => get());
+watch(reload, () => reload.value ? get() : '');
 
 const emit = defineEmits(['on-edit', 'on-duplicate', 'before-save', 'on-close', 'before-remove']);
 
@@ -124,6 +124,7 @@ const get = async () => {
     if (response.isOk) {
         items.value = response.data.items;
         loading.value = false;
+        reload.value = false;
     }
 };
 

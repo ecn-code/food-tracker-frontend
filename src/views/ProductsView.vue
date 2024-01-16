@@ -32,7 +32,7 @@
                                 <v-col cols="12" v-for="nutritionalValue in editedNutritionalValues">
                                     <v-text-field :rules="[rules.required]" v-model="nutritionalValue[0]" :disabled="true"
                                         label="Name"></v-text-field>
-                                    <v-text-field :rules="[rules.required]" v-model="nutritionalValue[2]" :disabled="saving"
+                                    <v-text-field type="number" :rules="[rules.required]" v-model="nutritionalValue[2]" :disabled="saving"
                                         :suffix="nutritionalValue[1]" label="Value"></v-text-field>
                                 </v-col>
                             </v-row>

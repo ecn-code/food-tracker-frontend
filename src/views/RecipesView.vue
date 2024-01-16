@@ -31,7 +31,7 @@
                                 <v-col cols="12" v-for="product in editedProducts">
                                     <v-text-field :rules="[rules.required]" v-model="product[0]" :disabled="true"
                                         label="Name"></v-text-field>
-                                    <v-text-field :rules="[rules.required]" v-model="product[2]" :disabled="saving"
+                                    <v-text-field type="number" :rules="[rules.required]" v-model="product[2]" :disabled="saving"
                                         :suffix="product[1]" label="Value"></v-text-field>
                                 </v-col>
                             </v-row>

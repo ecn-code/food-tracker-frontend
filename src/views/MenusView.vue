@@ -89,7 +89,7 @@
                                 <v-col cols="12" v-for="product in selectedProducts">
                                     <v-text-field :rules="[rules.required]" v-model="product.name" :disabled="true"
                                         label="Name"></v-text-field>
-                                    <v-text-field :rules="[rules.required]" v-model="product.value" :disabled="saving"
+                                    <v-text-field type="number" :rules="[rules.required]" v-model="product.value" :disabled="saving"
                                         suffix="g" label="Value"></v-text-field>
                                 </v-col>
                             </v-row>
@@ -175,7 +175,12 @@ const selectedProducts = ref([]);
 const products = ref([]);
 
 const edit = () => {
-    selectedProducts.value = editingMenu.value.products.map(p => p);
+    selectedProducts.value = editingMenu.value.products.map(p => Object.assign({}, p));
+    selectedProducts.value.forEach(p => {
+        products.value.filter(p2 => p2.name == p.name).forEach(p2 => {
+            p2.value = p.value;
+        });
+    });
 };
 
 const save = () => {
@@ -189,6 +194,9 @@ const save = () => {
 };
 
 const close = () => {
+    products.value.forEach(p => {
+        delete p.value;
+    });
     selectedProducts.value = [];
 }
 
