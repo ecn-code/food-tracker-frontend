@@ -65,7 +65,7 @@ const headers = [
 ];
 const productProps = product => {
     if(!product.name) {
-        alert('Error con producto que posiblemente fue eliminado y esta asociado');
+        console.error('Error con producto que posiblemente fue eliminado y esta asociado');
     }
 
     return {
@@ -78,7 +78,7 @@ const getProducts = async () => {
     if (response.isOk) {
         products.value = response.data.items;
     } else {
-        alert('Error retrieving products');
+        console.error('Error retrieving products');
     }
 };
 onMounted(getProducts);

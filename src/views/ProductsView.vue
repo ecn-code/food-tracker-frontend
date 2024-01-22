@@ -76,7 +76,7 @@ const getNutritionalValues = async () => {
     if (response.isOk) {
         nutritionals.value = response.data.items;
     } else {
-        alert('Error retrieving nutritionals');
+        console.error('Error retrieving nutritionals');
     }
 };
 onMounted(getNutritionalValues);

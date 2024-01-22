@@ -63,7 +63,7 @@ const getUnits = async () => {
     if (response.isOk) {
         units.value = response.data.items;
     } else {
-        alert('Error retrieving units');
+        console.error('Error retrieving units');
     }
 };
 onMounted(getUnits);

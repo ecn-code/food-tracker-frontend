@@ -1,7 +1,7 @@
 <template>
     <v-layout>
-        <v-navigation-drawer expand-on-hover rail image="https://cdn.vuetifyjs.com/images/backgrounds/bg-2.jpg" permanent
-            theme="dark">
+        <v-navigation-drawer v-if="screeWidth <= 400" rail image="https://cdn.vuetifyjs.com/images/backgrounds/bg-2.jpg"
+            permanent theme="dark">
             <v-list nav>
                 <v-list-item v-for="link in menu.links" :to="link.to" :prepend-icon="link.icon" :title="link.title"
                     :value="link.title">
@@ -15,14 +15,24 @@
 
         <v-app-bar title="Food Tracker" color="blue-accent-3" elevation="5"></v-app-bar>
 
-        <v-main style="min-height: 300px;">
+        <v-main scrollable>
             <slot name="content"></slot>
         </v-main>
+
+        <v-bottom-navigation v-if="screeWidth > 400" bg-color="blue-accent-3">
+            <v-btn v-for="link in menu.links" :to="link.to" :value="link.title">
+                <v-icon>{{ link.icon }}</v-icon>
+                {{ link.title }}
+            </v-btn>
+            <v-btn @click="logoutAction" value="logout">
+                <v-icon>mdi-power</v-icon>
+                Logout
+            </v-btn>
+        </v-bottom-navigation>
     </v-layout>
 </template>
 
 <script setup>
-import { storeToRefs } from 'pinia';
 import router from '../router';
 
 import { useUserStore } from '../stores/user';
@@ -30,7 +40,7 @@ import { useUserStore } from '../stores/user';
 
 const userStore = useUserStore();
 const { logout } = userStore;
-const { user } = storeToRefs(userStore);
+const screeWidth = screen.width;
 
 const logoutAction = () => {
     logout();
@@ -60,27 +70,5 @@ main {
     max-height: 100vh;
     overflow-x: auto;
     overflow-y: hidden;
-}
-#nav {
-    min-height: 100vh;
-}
-.divider {
-    flex-shrink: 0;
-    width: 1.5rem;
-    height: 100vh;
-    background-color: rgba(0, 0, 0, .1);
-    border: solid rgba(0, 0, 0, .15);
-    border-width: 1px 0;
-    box-shadow: inset 0 0.5em 1.5em rgba(0, 0, 0, .1), inset 0 0.125em 0.5em rgba(0, 0, 0, .15);
-}
-.bi {
-    vertical-align: -0.125em;
-    pointer-events: none;
-    fill: currentColor;
-    margin-right: 0.5rem;
-}
-.router-link-exact-active {
-    color: #fff;
-    background-color: #0d6efd;
 }
 </css>

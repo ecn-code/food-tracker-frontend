@@ -25,7 +25,7 @@
                                         <v-row>
                                             <v-col cols="12">
                                                 <v-text-field :rules="[rules.required]" v-model="date"
-                                                    :disabled="saving" tabindex="2" type="date" label="Date"></v-text-field>
+                                                    :disabled="saving" tabindex="2" type="week" label="Date"></v-text-field>
                                             </v-col>
                                         </v-row>
                                     </v-container>
@@ -135,7 +135,7 @@ const getRecipes = async () => {
     if (response.isOk) {
         recipes.value = response.data.items;
     } else {
-        alert('Error retrieving recipes');
+        console.error('Error retrieving recipes');
     }
 };
 const getUsers = async () => {
@@ -143,7 +143,7 @@ const getUsers = async () => {
     if (response.isOk) {
         users.value = response.data;
     } else {
-        alert('Error retrieving users');
+        console.error('Error retrieving users');
     }
 };
 const getProducts = async () => {
@@ -151,7 +151,7 @@ const getProducts = async () => {
     if (response.isOk) {
         products.value = response.data.items;
     } else {
-        alert('Error retrieving products');
+        console.error('Error retrieving products');
     }
 };
 onMounted(() => {
