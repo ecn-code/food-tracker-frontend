@@ -1,8 +1,9 @@
 <template>
   <LayoutBase>
     <template v-slot:content>
-      <v-skeleton-loader :loading="loading" type="list-item-two-line">
-        <v-text-field @update:modelValue="updateWeekYear" v-model="weekYear" tabindex="2" type="week" label="Date"></v-text-field>
+      <v-skeleton-loader :loading="loading" type="text, card, divider, card">
+        <v-text-field @update:modelValue="updateWeekYear" v-model="weekYear" tabindex="2" type="week"
+          label="Date"></v-text-field>
         <v-container fluid>
           <v-row class="flex-child text-subtitle-2">
 
@@ -32,11 +33,12 @@
                 <v-col cols="12" md="4" sm="6" v-for="menu in weeklyMenu.menus">
                   <v-card class="mx-auto" max-width="400">
                     <v-toolbar flat color="blue-lighten-4" dark>
-                      <v-toolbar-title>{{ getDayOfWeek(menu.date) }} ({{ menu.date }})</v-toolbar-title>
+                      <v-toolbar-title>{{ getDayOfWeek(menu.date) }} ({{ menu.date }})
+                      </v-toolbar-title>
                     </v-toolbar>
 
                     <v-card-text>
-                      <v-col v-if="!Array.isArray(menu.recipes)" cols="12"
+                      <v-col v-if="!Array.isArray(menu.recipes) && !Array.isArray(menu.products)" cols="12"
                         v-for="part_of_day in ['Desayuno', 'Comida', 'Cena']">
                         <h5>{{ part_of_day }}</h5>
                         <v-divider></v-divider>
@@ -46,15 +48,24 @@
                           </li>
                         </ul>
                       </v-col>
-                      <div v-if="Array.isArray(menu.recipes)">
+                      <div v-if="Array.isArray(menu.recipes) && Array.isArray(menu.products)">
                         <h3>Menu</h3>
                         <ul class="px-4">
                           <li v-for="recipe in menu.recipes">
                             <h4>{{ recipe }}</h4>
                           </li>
+                          <li v-for="product in menu.products">
+                            <h4>{{ product.name }} ({{ product.value }}gr)</h4>
+                          </li>
                         </ul>
                       </div>
                     </v-card-text>
+
+                    <v-card-actions>
+                      <v-chip size="x-small" v-for="nutritional_value in menu.nutritional_value">
+                        {{ nutritional_value.name }}={{ nutritional_value.value }}{{ nutritional_value.unit }}
+                      </v-chip>
+                    </v-card-actions>
                   </v-card>
                 </v-col>
               </v-row>
@@ -107,7 +118,7 @@ const getDayOfWeek = (dayStr) => {
 };
 
 const getAvg = (value) => {
-  return value / 7;
+  return value / Object.keys(weeklyMenu.value.menus).length;
 };
 
 const twoDecimals = (value) => {
