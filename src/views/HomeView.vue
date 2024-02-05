@@ -61,11 +61,11 @@
                       </div>
                     </v-card-text>
 
-                    <v-card-actions>
-                      <v-chip size="x-small" v-for="nutritional_value in menu.nutritional_value">
+                    <div class="mx-2 mb-2">
+                      <v-chip class="mb-1 mr-1" size="small" v-for="nutritional_value in menu.nutritional_value">
                         {{ nutritional_value.name }}={{ nutritional_value.value }}{{ nutritional_value.unit }}
                       </v-chip>
-                    </v-card-actions>
+                    </div>
                   </v-card>
                 </v-col>
               </v-row>
