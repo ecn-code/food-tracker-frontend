@@ -2,33 +2,16 @@
   <LayoutBase>
     <template v-slot:content>
       <v-skeleton-loader :loading="loading" type="text, card, divider, card">
-        <v-text-field @update:modelValue="updateWeekYear" v-model="weekYear" tabindex="2" type="week"
+        <v-text-field @update:modelValue="updateWeekYear" v-model="weekYear" tabindex="2" type="week" :disabled="loading"
           label="Date"></v-text-field>
+        <v-select @update:modelValue="updateUser" v-model="username" :items="users" :disabled="loading"
+          item-title="username" item-value="username" tabindex="3" label="User"></v-select>
+
         <v-container fluid>
           <v-row class="flex-child text-subtitle-2">
 
             <v-col class="d-flex" cols="12">
               <v-row class="ma-n3">
-                <v-col cols="4" v-for="nutritional_value in weeklyMenu.nutritional_value">
-                  <v-card class="mx-auto" max-width="400">
-                    <v-toolbar flat color="deep-purple-accent-4" dark>
-                      <v-toolbar-title>{{ nutritional_value.name }}</v-toolbar-title>
-                    </v-toolbar>
-
-                    <v-card-text>
-                      Total:
-                      <h2 class="text-h6 mb-2 text-right">
-                        {{ twoDecimals(nutritional_value.value) }} {{ nutritional_value.unit }}
-                      </h2>
-                      AVG:
-                      <h2 class="text-h6 mb-2 text-right">
-                        {{ twoDecimals(getAvg(nutritional_value.value)) }} {{ nutritional_value.unit }}
-                      </h2>
-                    </v-card-text>
-                  </v-card>
-                </v-col>
-
-                <v-divider></v-divider>
 
                 <v-col cols="12" md="4" sm="6" v-for="menu in weeklyMenu.menus">
                   <v-card class="mx-auto" max-width="400">
@@ -68,6 +51,27 @@
                     </div>
                   </v-card>
                 </v-col>
+
+                <v-divider></v-divider>
+
+                <v-col cols="4" v-for="nutritional_value in weeklyMenu.nutritional_value">
+                  <v-card class="mx-auto" max-width="400">
+                    <v-toolbar flat color="deep-purple-accent-4" dark>
+                      <v-toolbar-title>{{ nutritional_value.name }}</v-toolbar-title>
+                    </v-toolbar>
+
+                    <v-card-text>
+                      Total:
+                      <h2 class="text-h6 mb-2 text-right">
+                        {{ twoDecimals(nutritional_value.value) }} {{ nutritional_value.unit }}
+                      </h2>
+                      AVG:
+                      <h2 class="text-h6 mb-2 text-right">
+                        {{ twoDecimals(getAvg(nutritional_value.value)) }} {{ nutritional_value.unit }}
+                      </h2>
+                    </v-card-text>
+                  </v-card>
+                </v-col>
               </v-row>
             </v-col>
 
@@ -82,6 +86,7 @@
 import LayoutBase from '../layouts/LayoutBase.vue';
 import { ref, onMounted } from 'vue';
 import WeeklyMenuService from '../services/WeeklyMenuService';
+import UserService from '../services/UserService';
 import { useUserStore } from "../stores/user";
 import { storeToRefs } from 'pinia';
 
@@ -90,15 +95,21 @@ const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Fri
 const weekYear = ref(new Date().getYearWeek());
 const weeklyMenu = ref({});
 const loading = ref(true);
+const users = ref([]);
+const username = ref(null);
 
 const userStore = useUserStore();
 const { user } = storeToRefs(userStore);
 
 const weeklyMenuService = new WeeklyMenuService;
+const userService = new UserService;
 
 const getWeeklyMenu = async () => {
   loading.value = true;
-  const response = await weeklyMenuService.get(user.value.username, weekYear.value);
+  const response = await weeklyMenuService.get({
+    username: username.value,
+    year_week: weekYear.value
+  });
   if (response.isOk) {
     const data = response.data;
     const menusSort = Object.keys(data.menus).sort();
@@ -111,7 +122,19 @@ const getWeeklyMenu = async () => {
   }
   loading.value = false;
 };
-onMounted(getWeeklyMenu);
+const getUsers = async () => {
+  const response = await userService.get();
+  if (response.isOk) {
+    users.value = response.data;
+  } else {
+    console.error('Error retrieving users');
+  }
+};
+onMounted(() => {
+  username.value = user.value.username;
+  getWeeklyMenu();
+  getUsers();
+});
 
 const getDayOfWeek = (dayStr) => {
   return daysOfWeek[new Date(dayStr).getDay()];
@@ -127,6 +150,11 @@ const twoDecimals = (value) => {
 
 const updateWeekYear = weekYearUpdated => {
   weekYear.value = weekYearUpdated;
+  getWeeklyMenu();
+};
+
+const updateUser = userUpdated => {
+  username.value = userUpdated;
   getWeeklyMenu();
 };
 </script>

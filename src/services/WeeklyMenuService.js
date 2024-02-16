@@ -23,7 +23,7 @@ export default class WeeklyMenuService extends Service {
         );
     };
 
-    get(username, year_week) {
+    get(params) {
         const userStore = useUserStore();
         const { user } = storeToRefs(userStore);
         const token = user.value.token;
@@ -37,10 +37,7 @@ export default class WeeklyMenuService extends Service {
                     'Authorization': `Bearer ${token}`
                 }
             },
-            {
-                username,
-                year_week
-            }
+            params
         );
     };
 

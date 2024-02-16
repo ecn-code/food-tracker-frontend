@@ -1,15 +1,19 @@
 <template>
     <LayoutBase>
         <template v-slot:content>
-            <TableComponent v-model:loading="loading" v-model:reload="reload" v-model:item="editingMenu" v-model:validationMessage="validationMessage" v-model:saving="saving"
-                :emptyItem="{ id: null, products: [], recipes: [], nutritional_value: [], username: null, date: null }" :headers="headers"
-                :service="menuService" :sort-by="[{ key: 'name', order: 'asc' }]" id-name="id" :can-duplicate="true"
-                title="Menus" @on-edit="edit" @on-duplicate="edit" @before-save="save" @on-close="close" @before-remove="remove"
+            <TableComponent v-model:loading="loading" v-model:reload="reload" v-model:item="editingMenu"
+                v-model:validationMessage="validationMessage" v-model:saving="saving"
+                :emptyItem="{ id: null, products: [], recipes: [], nutritional_value: [], username: null, date: null }"
+                :headers="headers" :service="menuService" :sort-by="[{ key: 'name', order: 'asc' }]" id-name="id"
+                :can-duplicate="true" title="Menus" @on-edit="edit" @on-duplicate="edit" @before-save="save"
+                @on-close="close" @before-remove="remove" :params="params" @on-reset="reset"
                 :slot-cells="['item.nutritional_value', 'item.products', 'item.recipes']">
 
                 <template v-slot:toolbar>
                     <v-dialog @click:outside="closeBlockMenu" v-model="dialogBlockMenu" max-width="350px">
                         <template v-slot:activator="{ props }">
+                            <v-text-field @update:modelValue="updateWeekYear" class="mt-5" v-model="weekYear" type="week"
+                                :disabled="loading" label="Date" style="max-width: 200px"></v-text-field>
                             <v-btn :disabled="loading" color="primary" dark class="mb-2" @click="openBlockMenu">
                                 Lock
                             </v-btn>
@@ -24,8 +28,8 @@
                                     <v-container>
                                         <v-row>
                                             <v-col cols="12">
-                                                <v-text-field :rules="[rules.required]" v-model="date"
-                                                    :disabled="saving" tabindex="2" type="week" label="Date"></v-text-field>
+                                                <v-text-field :rules="[rules.required]" v-model="date" :disabled="saving"
+                                                    tabindex="2" type="week" label="Date"></v-text-field>
                                             </v-col>
                                         </v-row>
                                     </v-container>
@@ -51,12 +55,12 @@
                     <v-chip v-for="nv in item.nutritional_value" size="x-small" color="primary">
                         {{ columnNutritionalValue(nv) }}
                     </v-chip>
-                </template>                
+                </template>
                 <template v-slot:item.products="{ item }">
                     <v-chip v-for="p in item.products" size="x-small" color="primary">
                         {{ columnProducts(p) }}
                     </v-chip>
-                </template>                
+                </template>
                 <template v-slot:item.recipes="{ item }">
                     <v-chip v-for="r in item.recipes" size="x-small" color="primary">
                         {{ columnRecipes(r) }}
@@ -72,8 +76,9 @@
                                         tabindex="2" type="date" label="Date"></v-text-field>
                                 </v-col>
                                 <v-col cols="6">
-                                    <v-select :rules="[rules.required]" v-model="editingMenu.username" :items="users" :disabled="saving"
-                                        item-title="username" item-value="username" tabindex="3" label="User"></v-select>
+                                    <v-select :rules="[rules.required]" v-model="editingMenu.username" :items="users"
+                                        :disabled="saving" item-title="username" item-value="username" tabindex="3"
+                                        label="User"></v-select>
                                 </v-col>
                                 <v-col cols="11">
                                     <v-select v-model="editingMenu.recipes" :items="recipes" :disabled="saving"
@@ -89,8 +94,8 @@
                                 <v-col cols="12" v-for="product in selectedProducts">
                                     <v-text-field :rules="[rules.required]" v-model="product.name" :disabled="true"
                                         label="Name"></v-text-field>
-                                    <v-text-field type="number" :rules="[rules.required]" v-model="product.value" :disabled="saving"
-                                        suffix="g" label="Value"></v-text-field>
+                                    <v-text-field type="number" :rules="[rules.required]" v-model="product.value"
+                                        :disabled="saving" suffix="g" label="Value"></v-text-field>
                                 </v-col>
                             </v-row>
                         </v-container>
@@ -167,9 +172,11 @@ const recipes = ref([]);
 const users = ref([]);
 const date = ref(null);
 const dialogBlockMenu = ref(false);
-const form  = ref(false);
+const form = ref(false);
 const reload = ref(false);
 const loading = ref(false);
+const weekYear = ref(null);
+const params = ref({});
 
 const selectedProducts = ref([]);
 const products = ref([]);
@@ -216,7 +223,7 @@ const openBlockMenu = () => {
 const blockMenu = async () => {
     saving.value = true;
     const response = await menuService.lock(date.value);
-    if(response.isOk) {
+    if (response.isOk) {
         dialogBlockMenu.value = false;
         reload.value = true;
     }
@@ -225,5 +232,17 @@ const blockMenu = async () => {
 
 const closeBlockMenu = () => {
     dialogBlockMenu.value = false;
+};
+
+const updateWeekYear = weekYearUpdated => {
+  weekYear.value = weekYearUpdated;
+  params.value['year_week'] = weekYearUpdated;
+  reload.value = true;
+};
+
+const reset = () => {
+    params.value['year_week'] = '';
+    weekYear.value = null;
+    reload.value = true;
 };
 </script>

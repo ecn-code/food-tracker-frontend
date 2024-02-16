@@ -64,7 +64,7 @@
             </v-icon>
         </template>
         <template v-slot:no-data>
-            <v-btn color="primary" @click="get">
+            <v-btn color="primary" @click="clear">
                 Reset
             </v-btn>
         </template>
@@ -96,6 +96,7 @@ const {
     title,
     slotCells,
     canDuplicate,
+    params
 } = defineProps({
     headers: Array,
     service: Object,
@@ -105,6 +106,7 @@ const {
     title: String,
     slotCells: Array,
     canDuplicate: { type: Boolean, required: false, default: false },
+    params: { type: Object, required: false, default: {} },
 });
 
 const formTitle = computed(() => {
@@ -115,12 +117,12 @@ const saveBtnText = computed(() => {
 });
 watch(reload, () => reload.value ? get() : '');
 
-const emit = defineEmits(['on-edit', 'on-duplicate', 'before-save', 'on-close', 'before-remove']);
+const emit = defineEmits(['on-edit', 'on-duplicate', 'before-save', 'on-close', 'on-reset', 'before-remove']);
 
 const get = async () => {
     loading.value = true;
 
-    const response = await service.get();
+    const response = await service.get(params);
     if (response.isOk) {
         items.value = response.data.items;
         loading.value = false;
@@ -221,5 +223,9 @@ const remove = async () => {
 const closeDialogRemove = () => {
     dialogRemove.value = false;
     item.value = Object.assign({}, emptyItem);
+};
+
+const clear = () => {
+    emit('on-reset');
 };
 </script>
