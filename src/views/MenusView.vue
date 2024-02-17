@@ -12,6 +12,9 @@
                 <template v-slot:toolbar>
                     <v-dialog @click:outside="closeBlockMenu" v-model="dialogBlockMenu" max-width="350px">
                         <template v-slot:activator="{ props }">
+                            <v-select :clearable="true" @update:modelValue="updateUser" class="mt-5" v-model="username" :items="users"
+                                :disabled="loading" item-title="username" item-value="username"
+                                label="User" style="max-width: 200px"></v-select>
                             <v-text-field @update:modelValue="updateWeekYear" class="mt-5" v-model="weekYear" type="week"
                                 :disabled="loading" label="Date" style="max-width: 200px"></v-text-field>
                             <v-btn :disabled="loading" color="primary" dark class="mb-2" @click="openBlockMenu">
@@ -177,6 +180,7 @@ const reload = ref(false);
 const loading = ref(false);
 const weekYear = ref(null);
 const params = ref({});
+const username = ref(null);
 
 const selectedProducts = ref([]);
 const products = ref([]);
@@ -235,14 +239,24 @@ const closeBlockMenu = () => {
 };
 
 const updateWeekYear = weekYearUpdated => {
-  weekYear.value = weekYearUpdated;
-  params.value['year_week'] = weekYearUpdated;
-  reload.value = true;
+    weekYear.value = weekYearUpdated;
+    params.value['year_week'] = weekYearUpdated;
+    reload.value = true;
+};
+
+const updateUser = userUpdated => {
+    username.value = userUpdated;
+    params.value['username'] = userUpdated ? userUpdated : '';
+    reload.value = true;
 };
 
 const reset = () => {
     params.value['year_week'] = '';
     weekYear.value = null;
+
+    username.value = null;
+    params.value['username'] = '';
+
     reload.value = true;
 };
 </script>
