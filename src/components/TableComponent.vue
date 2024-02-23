@@ -53,6 +53,7 @@
             </v-toolbar>
         </template>
         <template v-slot:item.actions="{ item }">
+            <slot name="item_actions" :item="item"></slot>
             <v-icon size="small" class="me-2" @click="edit(item)">
                 mdi-pencil
             </v-icon>
@@ -198,6 +199,7 @@ const close = (callback) => {
         loading.value = false;
         editing.value = false;
         saving.value = false;
+        validationMessage.value = null;
         emit('on-close');
     });
 };

@@ -38,7 +38,7 @@
                             <h4>{{ recipe }}</h4>
                           </li>
                           <li v-for="product in menu.products">
-                            <h4>{{ product.name }} ({{ product.value }}gr)</h4>
+                            <h4>{{ product.name }} ({{ product.value }}{{ getSuffix(product) }})</h4>
                           </li>
                         </ul>
                       </div>
@@ -156,5 +156,13 @@ const updateWeekYear = weekYearUpdated => {
 const updateUser = userUpdated => {
   username.value = userUpdated;
   getWeeklyMenu();
+};
+
+const getSuffix = product => {
+  if(product.recipe_name) {
+    return product.value > 1 ? 'portions' : 'portion';
+  }
+  
+  return 'gr';
 };
 </script>

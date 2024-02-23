@@ -48,6 +48,17 @@ export default class ProductService extends Service {
         );
     }
 
+    async addFromRecipe(recipe, portions) {
+        return await this.fetchWithBody(
+            this.RESOURCE + '/recipe',
+            'POST',
+            JSON.stringify({
+                recipe_name: recipe,
+                portions: portions
+            })
+        );
+    }
+
     async edit(shortname, unit) {
         return await this.fetchWithBody(
             this.RESOURCE + '/' + shortname,

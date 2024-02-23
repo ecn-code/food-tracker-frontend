@@ -98,7 +98,7 @@
                                     <v-text-field :rules="[rules.required]" v-model="product.name" :disabled="true"
                                         label="Name"></v-text-field>
                                     <v-text-field type="number" :rules="[rules.required]" v-model="product.value"
-                                        :disabled="saving" suffix="g" label="Value"></v-text-field>
+                                        :disabled="saving" :suffix="getSuffix(product)" label="Value"></v-text-field>
                                 </v-col>
                             </v-row>
                         </v-container>
@@ -136,7 +136,7 @@ const headers = [
     { title: 'Actions', key: 'actions', sortable: false },
 ];
 const columnNutritionalValue = nv => `${nv.name}=${nv.value}${nv.unit}`;
-const columnProducts = p => `${p.name}=${p.value}g`;
+const columnProducts = p => `${p.name}=${p.value}${getSuffix(p)}`;
 const columnRecipes = r => `${r}`;
 const getRecipes = async () => {
     const response = await recipeService.get();
@@ -200,6 +200,7 @@ const save = () => {
         return {
             name: p.name,
             value: p.value,
+            recipe_name: p.recipe_name
         }
     });
 };
@@ -258,5 +259,13 @@ const reset = () => {
     params.value['username'] = '';
 
     reload.value = true;
+};
+
+const getSuffix = product => {
+  if(product.recipe_name) {
+    return product.value > 1 ? 'portions' : 'portion';
+  }
+  
+  return 'gr';
 };
 </script>

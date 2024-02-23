@@ -13,7 +13,7 @@ export default class Service {
 
             const isOk = response.ok;
             const status = response.status;
-            const data = status == 200 || status == 409 ? await response.json() : null;
+            const data = status != 204 && status != 419 ? await response.json() : null;
 
             const userStore = useUserStore();
             const { logout } = userStore;
@@ -34,7 +34,7 @@ export default class Service {
             console.error(error);
             return {
                 isOk: false,
-                data: null,
+                data: error,
                 status: 500
             };
         }

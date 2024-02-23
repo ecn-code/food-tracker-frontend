@@ -40,9 +40,37 @@
                             variant="tonal"></v-alert>
                     </v-card-text>
                 </template>
+                <template v-slot:item_actions="{item}">
+                    <v-icon class="me-2" size="small" @click="openDialogCreateProduct(item)">
+                        mdi-apple
+                    </v-icon>
+                </template>
             </TableComponent>
         </template>
     </LayoutBase>
+    <v-dialog @click:outside="closeDialogCreateProduct" transition="dialog-bottom-transition" v-model="dialogCreateProduct" max-width="500px">
+        <v-card class="mx-auto">
+            <v-card-title class="mx-auto text-h5">Create product</v-card-title>
+            <v-card-subtitle>You are going to create a product from <b>'{{ recipeSelected }}'</b>
+                (Portion of {{ recipeSelected }})</v-card-subtitle>
+            <v-card-actions class="mx-auto">
+                <v-form @submit.prevent="createProduct">
+                    <v-text-field
+                        autofocus
+                        :disabled="saving"
+                        v-model="portions"
+                        label="Portions"
+                        required
+                        type="number"
+                    ></v-text-field>
+                    <v-spacer></v-spacer>
+                    <v-btn :disabled="saving" color="blue-darken-1" variant="text" @click="closeDialogCreateProduct">Cancel</v-btn>
+                    <v-btn :disabled="saving" class="float-right" color="blue-darken-1" variant="text" type="submit">Create</v-btn>
+                </v-form>
+                <v-spacer></v-spacer>
+            </v-card-actions>
+        </v-card>
+    </v-dialog>
 </template>
 
 <script setup>
@@ -89,6 +117,9 @@ const validationMessage = ref(null);
 const products = ref([]);
 const selectedProducts = ref([]);
 const editedProducts = ref([]);
+const dialogCreateProduct = ref(false);
+const recipeSelected = ref(null);
+const portions = ref(null);
 
 const selectProduct = currentSelectedProducts => {
     const selected = [];
@@ -118,4 +149,31 @@ const close = () => {
     editedProducts.value = [];
     selectedProducts.value = [];
 }
+
+const openDialogCreateProduct = item => {
+    dialogCreateProduct.value = true;
+    recipeSelected.value = item.name;
+};
+
+const closeDialogCreateProduct = () => {
+    dialogCreateProduct.value = false;
+    recipeSelected.value = null;
+    portions.value = null;
+};
+
+const createProduct = async () => {
+    if(!portions.value) {
+        alert('Portions is required');
+        return;
+    }
+
+    saving.value = true;
+    const response = await productService.addFromRecipe(recipeSelected.value, portions.value);
+    if (response.isOk) {
+        closeDialogCreateProduct();
+    } else {
+        alert('Error creating product');
+    }
+    saving.value = false;
+};
 </script>
