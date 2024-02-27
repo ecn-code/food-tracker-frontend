@@ -126,7 +126,7 @@ const selectProduct = currentSelectedProducts => {
     currentSelectedProducts.forEach(pSelected => {
         const product = editedProducts.value.filter(p => p[0] == pSelected.name);
         if (product.length == 0) {
-            selected.push([pSelected.name, pSelected.unit, 0]);
+            selected.push([pSelected.name, getSuffix(pSelected), 0]);
         } else {
             selected.push([product[0][0], product[0][1], product[0][2]]);
         }
@@ -175,5 +175,13 @@ const createProduct = async () => {
         alert('Error creating product');
     }
     saving.value = false;
+};
+
+const getSuffix = product => {
+  if(product.recipe_name) {
+    return 'portions';
+  }
+  
+  return 'gr';
 };
 </script>

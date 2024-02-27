@@ -7,6 +7,7 @@ import NutritionalValuesView from '../views/NutritionalValuesView.vue';
 import ProductsView from '../views/ProductsView.vue';
 import RecipesView from '../views/RecipesView.vue';
 import UnitsView from '../views/UnitsView.vue';
+import SettingsView from '../views/SettingsView.vue';
 
 import { useUserStore } from '../stores/user';
 import { storeToRefs } from 'pinia';
@@ -67,6 +68,14 @@ const router = createRouter({
       path: '/menus',
       name: 'menus',
       component: MenusView,
+      meta: {
+        requireAuth: true
+      }
+    },
+    {
+      path: '/settings',
+      name: 'settings',
+      component: SettingsView,
       meta: {
         requireAuth: true
       }

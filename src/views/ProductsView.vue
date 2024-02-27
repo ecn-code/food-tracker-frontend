@@ -7,7 +7,7 @@
                 title="Products" @on-edit="edit" @before-save="save" @on-close="close" :slot-cells="['item.nutritional_value']">
                 
                 <template v-slot:item.nutritional_value="{item}">
-                    <v-chip v-for="nv in item.nutritional_value" size="x-small" color="primary">
+                    <v-chip v-for="nv in item.nutritional_value.sort((n1, n2) => n1[0].toLowerCase().localeCompare(n2[0].toLowerCase()))" size="x-small" color="primary">
                         {{ columnNutritionalValue(nv) }}
                     </v-chip>
                 </template>
@@ -74,7 +74,7 @@ const columnNutritionalValue = nv => `${nv[0]}=${nv[2]}${nv[1]}`;
 const getNutritionalValues = async () => {
     const response = await nutritionalValueService.get();
     if (response.isOk) {
-        nutritionals.value = response.data.items;
+        nutritionals.value = response.data.items.sort((n1, n2) => n1.name.toLowerCase().localeCompare(n2.name.toLowerCase()));
     } else {
         console.error('Error retrieving nutritionals');
     }
@@ -95,7 +95,6 @@ const selectNutritionalValue = nutritionalValuesSelected => {
         if (nutritionalValue.length == 0) {
             selected.push([nvSelected.name, nvSelected.unit, 0]);
         } else {
-            console.log(nutritionalValue)
             selected.push([nutritionalValue[0][0], nutritionalValue[0][1], nutritionalValue[0][2]]);
         }
     });

@@ -21,17 +21,18 @@
                     </v-toolbar>
 
                     <v-card-text>
-                      <v-col v-if="!Array.isArray(menu.recipes) && !Array.isArray(menu.products)" cols="12"
-                        v-for="part_of_day in ['Desayuno', 'Comida', 'Cena']">
-                        <h5>{{ part_of_day }}</h5>
+                      <v-col v-if="!Array.isArray(menu.products)" cols="12"
+                        v-for="partOfDay in Object.keys(menu.products)">
+                        <h3>{{ partOfDay }}</h3>
                         <v-divider></v-divider>
                         <ul class="px-4">
-                          <li v-for="recipe in ['Receta 1', 'Receta 2']">
-                            <h6>{{ recipe }}</h6>
+                          <li v-for="product in menu.products[partOfDay]">
+                            <h4 v-if="product.value">{{ product.name }} ({{ product.value }}{{ getSuffix(product) }})</h4>
+                            <h4 v-if="!product.value">{{ product.name }}</h4>
                           </li>
                         </ul>
                       </v-col>
-                      <div v-if="Array.isArray(menu.recipes) && Array.isArray(menu.products)">
+                      <div v-if="Array.isArray(menu.products)">
                         <h3>Menu</h3>
                         <ul class="px-4">
                           <li v-for="recipe in menu.recipes">

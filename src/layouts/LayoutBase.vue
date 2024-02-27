@@ -13,7 +13,14 @@
             </template>
         </v-navigation-drawer>
 
-        <v-app-bar title="Food Tracker" color="blue-accent-3" elevation="5"></v-app-bar>
+        <v-app-bar color="blue-accent-3" elevation="5">
+            <v-app-bar-title>Food Tracker</v-app-bar-title>
+
+            <template v-slot:append>
+                <v-btn to="settings" icon="mdi-cog"></v-btn>
+                <v-btn @click="logoutAction" icon="mdi-power"></v-btn>
+            </template>
+        </v-app-bar>
 
         <v-main scrollable>
             <slot name="content"></slot>
@@ -23,10 +30,6 @@
             <v-btn v-for="link in menu.links" :to="link.to" :value="link.title">
                 <v-icon>{{ link.icon }}</v-icon>
                 {{ link.title }}
-            </v-btn>
-            <v-btn @click="logoutAction" value="logout">
-                <v-icon>mdi-power</v-icon>
-                Logout
             </v-btn>
         </v-bottom-navigation>
     </v-layout>
