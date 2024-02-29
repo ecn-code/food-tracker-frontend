@@ -1,17 +1,26 @@
 <template>
     <LayoutBase>
         <template v-slot:content>
-            <TableComponent v-model:item="editingProduct" v-model:validationMessage="validationMessage"
+            <TableComponent v-model:loading="loading" v-model:reload="reload" v-model:item="editingProduct" v-model:validationMessage="validationMessage"
                 v-model:saving="saving" :emptyItem="{ nutritional_value: [], name: null, description: null }"
-                :headers="headers" :service="productService" :sort-by="[{ key: 'name', order: 'asc' }]" id-name="name"
-                title="Products" @on-edit="edit" @before-save="save" @on-close="close" :slot-cells="['item.nutritional_value']">
-                
-                <template v-slot:item.nutritional_value="{item}">
-                    <v-chip v-for="nv in item.nutritional_value.sort((n1, n2) => n1[0].toLowerCase().localeCompare(n2[0].toLowerCase()))" size="x-small" color="primary">
+                :headers="headers" :service="productService" :sort-by="[{ key: 'name', order: 'asc' }]" id-name="SK"
+                title="Products" @on-edit="edit" @before-save="save" @on-close="close"
+                :slot-cells="['item.nutritional_value']">
+
+                <template v-slot:item.nutritional_value="{ item }">
+                    <v-chip
+                        v-for="nv in item.nutritional_value.sort((n1, n2) => n1[0].toLowerCase().localeCompare(n2[0].toLowerCase()))"
+                        size="x-small" color="primary">
                         {{ columnNutritionalValue(nv) }}
                     </v-chip>
                 </template>
-                
+
+                <template v-slot:toolbar>
+                    <v-fade-transition>
+                        <v-btn @click="reload = true" :disabled="loading" icon="mdi-reload"></v-btn>
+                    </v-fade-transition>
+                </template>
+
                 <template v-slot:form>
                     <v-card-text>
                         <v-container>
@@ -32,8 +41,8 @@
                                 <v-col cols="12" v-for="nutritionalValue in editedNutritionalValues">
                                     <v-text-field :rules="[rules.required]" v-model="nutritionalValue[0]" :disabled="true"
                                         label="Name"></v-text-field>
-                                    <v-text-field type="number" :rules="[rules.required]" v-model="nutritionalValue[2]" :disabled="saving"
-                                        :suffix="nutritionalValue[1]" label="Value"></v-text-field>
+                                    <v-text-field type="number" :rules="[rules.required]" v-model="nutritionalValue[2]"
+                                        :disabled="saving" :suffix="nutritionalValue[1]" label="Value"></v-text-field>
                                 </v-col>
                             </v-row>
                         </v-container>
@@ -83,6 +92,8 @@ onMounted(getNutritionalValues);
 
 const editingProduct = ref({});
 const saving = ref(false);
+const loading = ref(false);
+const reload = ref(false);
 const validationMessage = ref(null);
 const nutritionals = ref([]);
 const selectedNutritionalValues = ref([]);

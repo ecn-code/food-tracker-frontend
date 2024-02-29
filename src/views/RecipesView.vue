@@ -1,15 +1,21 @@
 <template>
     <LayoutBase>
         <template v-slot:content>
-            <TableComponent v-model:item="editingRecipe" v-model:validationMessage="validationMessage"
+            <TableComponent v-model:loading="loading" v-model:reload="reload" v-model:item="editingRecipe" v-model:validationMessage="validationMessage"
                 v-model:saving="saving" :emptyItem="{ products: [], nutritional_value: [], name: null, description: null }"
-                :headers="headers" :service="recipeService" :sort-by="[{ key: 'name', order: 'asc' }]" id-name="name"
+                :headers="headers" :service="recipeService" :sort-by="[{ key: 'name', order: 'asc' }]" id-name="SK"
                 title="Recipes" @on-edit="edit" @before-save="save" @on-close="close" :slot-cells="['item.nutritional_value']">
 
                 <template v-slot:item.nutritional_value="{ item }">
                     <v-chip v-for="nv in item.nutritional_value" size="x-small" color="primary">
                         {{ columnNutritionalValue(nv) }}
                     </v-chip>
+                </template>
+
+                <template v-slot:toolbar>
+                    <v-fade-transition>
+                        <v-btn @click="reload = true" :disabled="loading" icon="mdi-reload"></v-btn>
+                    </v-fade-transition>
                 </template>
 
                 <template v-slot:form>
@@ -113,6 +119,8 @@ onMounted(getProducts);
 
 const editingRecipe = ref({});
 const saving = ref(false);
+const loading = ref(false);
+const reload = ref(false);
 const validationMessage = ref(null);
 const products = ref([]);
 const selectedProducts = ref([]);

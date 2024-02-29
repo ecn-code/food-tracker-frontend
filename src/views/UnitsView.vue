@@ -1,9 +1,16 @@
 <template>
     <LayoutBase>
         <template v-slot:content>
-            <TableComponent v-model:item="editingUnit" v-model:validationMessage="validationMessage" v-model:saving="saving"
+            <TableComponent v-model:loading="loading" v-model:reload="reload" v-model:item="editingUnit" v-model:validationMessage="validationMessage" v-model:saving="saving"
                 :emptyItem="{ shortname: null, name: null }" :headers="headers" :service="unitService"
                 :sort-by="[{ key: 'shortname', order: 'asc' }]" id-name="shortname" title="Units">
+
+                <template v-slot:toolbar>
+                    <v-fade-transition>
+                        <v-btn @click="reload = true" :disabled="loading" icon="mdi-reload"></v-btn>
+                    </v-fade-transition>
+                </template>
+
                 <template v-slot:form>
                     <v-card-text>
                         <v-container>
@@ -36,6 +43,8 @@ import { ref } from 'vue';
 
 const editingUnit = ref({});
 const saving = ref(false);
+const loading = ref(false);
+const reload = ref(false);
 const validationMessage = ref(null);
 
 const rules = {

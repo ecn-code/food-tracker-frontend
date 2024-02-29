@@ -10,16 +10,16 @@
                 :slot-cells="['item.nutritional_value', 'item.products', 'item.recipes']">
 
                 <template v-slot:toolbar>
+                    <v-fade-transition>
+                        <v-btn @click="reload = true" :disabled="loading" icon="mdi-reload"></v-btn>
+                    </v-fade-transition>
+                    <v-select :clearable="true" @update:modelValue="updateUser" class="mt-5" v-model="username"
+                        :items="users" :disabled="loading" item-title="username" item-value="username" label="User"
+                        style="max-width: 200px"></v-select>
+                    <v-text-field @update:modelValue="updateWeekYear" class="mt-5" v-model="weekYear" type="week"
+                        :disabled="loading" label="Date" style="max-width: 200px"></v-text-field>
                     <v-dialog @click:outside="closeBlockMenu" v-model="dialogBlockMenu" max-width="350px">
                         <template v-slot:activator="{ props }">
-                            <v-fade-transition>
-                                <v-btn @click="reload = true" :disabled="loading" icon="mdi-reload"></v-btn>
-                            </v-fade-transition>
-                            <v-select :clearable="true" @update:modelValue="updateUser" class="mt-5" v-model="username"
-                                :items="users" :disabled="loading" item-title="username" item-value="username" label="User"
-                                style="max-width: 200px"></v-select>
-                            <v-text-field @update:modelValue="updateWeekYear" class="mt-5" v-model="weekYear" type="week"
-                                :disabled="loading" label="Date" style="max-width: 200px"></v-text-field>
                             <v-btn :disabled="loading" color="primary" dark class="mb-2" @click="openBlockMenu">
                                 Lock
                             </v-btn>
