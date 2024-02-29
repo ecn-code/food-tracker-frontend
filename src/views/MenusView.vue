@@ -5,7 +5,7 @@
                 v-model:validationMessage="validationMessage" v-model:saving="saving"
                 :emptyItem="{ id: null, products: [], recipes: [], nutritional_value: [], username: null, date: null }"
                 :headers="headers" :service="menuService" :sort-by="[{ key: 'name', order: 'asc' }]" id-name="id"
-                :can-duplicate="true" title="Menus" @on-edit="edit" @on-duplicate="edit" @before-save="save"
+                :can-duplicate="true" title="Menus" @on-add="add" @on-edit="edit" @on-duplicate="edit" @before-save="save"
                 @on-close="close" @before-remove="remove" :params="params" @on-reset="reset"
                 :slot-cells="['item.nutritional_value', 'item.products', 'item.recipes']">
 
@@ -235,6 +235,14 @@ const tab = ref(null);
 
 const selectedProducts = ref([]);
 const products = ref([]);
+
+const add = () => {
+    if (partsOfDay.value.length > 0) {
+        selectedProducts.value = {};
+    } else {
+        selectedProducts.value = [];
+    }
+};
 
 const edit = () => {
     if (!Array.isArray(editingMenu.value.products)) {

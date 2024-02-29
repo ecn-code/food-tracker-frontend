@@ -118,7 +118,7 @@ const saveBtnText = computed(() => {
 });
 watch(reload, () => reload.value ? get() : '');
 
-const emit = defineEmits(['on-edit', 'on-duplicate', 'before-save', 'on-close', 'on-reset', 'before-remove']);
+const emit = defineEmits(['on-add', 'on-edit', 'on-duplicate', 'before-save', 'on-close', 'on-reset', 'before-remove']);
 
 const get = async () => {
     loading.value = true;
@@ -136,6 +136,7 @@ const add = () => {
     nextTick(() => {
         formRef.value?.querySelector('.v-form')?.querySelector('[tabindex="1"]')?.focus();
     });
+    emit('on-add');
 };
 
 const edit = itemSelected => {
