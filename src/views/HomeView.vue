@@ -2,8 +2,8 @@
   <LayoutBase>
     <template v-slot:content>
       <v-skeleton-loader :loading="loading" type="text, card, divider, card">
-        <v-text-field @update:modelValue="updateWeekYear" v-model="weekYear" tabindex="2" type="week" :disabled="loading"
-          label="Date"></v-text-field>
+        <v-text-field @update:modelValue="updateWeekYear" v-model="weekYear" tabindex="2" type="week"
+          :disabled="loading" label="Date"></v-text-field>
         <v-select @update:modelValue="updateUser" v-model="username" :items="users" :disabled="loading"
           item-title="username" item-value="username" tabindex="3" label="User"></v-select>
 
@@ -21,16 +21,18 @@
                     </v-toolbar>
 
                     <v-card-text>
-                      <v-col v-if="!Array.isArray(menu.products)" cols="12"
-                        v-for="partOfDay in Object.keys(menu.products)">
-                        <h3>{{ partOfDay }}</h3>
-                        <v-divider></v-divider>
-                        <ul class="px-4">
-                          <li v-for="product in menu.products[partOfDay]">
-                            <h4 v-if="product.value">{{ product.name }} ({{ product.value }}{{ getSuffix(product) }})</h4>
-                            <h4 v-if="!product.value">{{ product.name }}</h4>
-                          </li>
-                        </ul>
+                      <v-col v-if="!Array.isArray(menu.products)" cols="12" v-for="partOfDay in partsOfDay">
+                        <div v-if="menu.products[partOfDay]">
+                          <h3>{{ partOfDay }}</h3>
+                          <v-divider></v-divider>
+                          <ul class="px-4">
+                            <li v-for="product in menu.products[partOfDay]">
+                              <h4 v-if="product.value">{{ product.name }} ({{ product.value }}{{ getSuffix(product) }})
+                              </h4>
+                              <h4 v-if="!product.value">{{ product.name }}</h4>
+                            </li>
+                          </ul>
+                        </div>
                       </v-col>
                       <div v-if="Array.isArray(menu.products)">
                         <h3>Menu</h3>
@@ -88,6 +90,7 @@ import LayoutBase from '../layouts/LayoutBase.vue';
 import { ref, onMounted } from 'vue';
 import WeeklyMenuService from '../services/WeeklyMenuService';
 import UserService from '../services/UserService';
+import SettingService from '../services/SettingService';
 import { useUserStore } from "../stores/user";
 import { storeToRefs } from 'pinia';
 
@@ -98,12 +101,14 @@ const weeklyMenu = ref({});
 const loading = ref(true);
 const users = ref([]);
 const username = ref(null);
+const partsOfDay = ref([]);
 
 const userStore = useUserStore();
 const { user } = storeToRefs(userStore);
 
 const weeklyMenuService = new WeeklyMenuService;
 const userService = new UserService;
+const settingService = new SettingService;
 
 const getWeeklyMenu = async () => {
   loading.value = true;
@@ -113,10 +118,6 @@ const getWeeklyMenu = async () => {
   });
   if (response.isOk) {
     const data = response.data;
-    const menusSort = Object.keys(data.menus).sort();
-    const menus = {};
-    menusSort.forEach(key => menus[key] = data.menus[key]);
-    data.menus = menus;
     weeklyMenu.value = data;
   } else {
     console.error('Error retrieving weekly menu');
@@ -135,6 +136,7 @@ onMounted(() => {
   username.value = user.value.username;
   getWeeklyMenu();
   getUsers();
+  getSettings();
 });
 
 const getDayOfWeek = (dayStr) => {
@@ -160,10 +162,20 @@ const updateUser = userUpdated => {
 };
 
 const getSuffix = product => {
-  if(product.recipe_name) {
+  if (product.recipe_name) {
     return product.value > 1 ? 'portions' : 'portion';
   }
-  
+
   return 'gr';
+};
+
+const getSettings = async () => {
+  const response = await settingService.get('settings_v1');
+
+  if (response.isOk) {
+    partsOfDay.value = response.data.settings.partsOfDay.split(',');
+  } else {
+    console.error('Error retrieving settings');
+  }
 };
 </script>

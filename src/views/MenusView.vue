@@ -5,8 +5,8 @@
                 v-model:validationMessage="validationMessage" v-model:saving="saving"
                 :emptyItem="{ id: null, products: [], recipes: [], nutritional_value: [], username: null, date: null }"
                 :headers="headers" :service="menuService" :sort-by="[{ key: 'name', order: 'asc' }]" id-name="id"
-                :can-duplicate="true" title="Menus" @on-add="add" @on-edit="edit" @on-duplicate="edit" @before-save="save"
-                @on-close="close" @before-remove="remove" :params="params" @on-reset="reset"
+                :can-duplicate="true" title="Menus" @on-add="add" @on-edit="edit" @on-duplicate="edit"
+                @before-save="save" @on-close="close" @before-remove="remove" :params="params" @on-reset="reset"
                 :slot-cells="['item.nutritional_value', 'item.products', 'item.recipes']">
 
                 <template v-slot:toolbar>
@@ -34,8 +34,9 @@
                                     <v-container>
                                         <v-row>
                                             <v-col cols="12">
-                                                <v-text-field :rules="[rules.required]" v-model="date" :disabled="saving"
-                                                    tabindex="2" type="week" label="Date"></v-text-field>
+                                                <v-text-field :rules="[rules.required]" v-model="date"
+                                                    :disabled="saving" tabindex="2" type="week"
+                                                    label="Date"></v-text-field>
                                             </v-col>
                                         </v-row>
                                     </v-container>
@@ -47,8 +48,8 @@
                                         @click="closeBlockMenu">
                                         Cancel
                                     </v-btn>
-                                    <v-btn tabindex="13" :disabled="!form || saving" color="blue-darken-1" variant="text"
-                                        type="submit">
+                                    <v-btn tabindex="13" :disabled="!form || saving" color="blue-darken-1"
+                                        variant="text" type="submit">
                                         Apply
                                     </v-btn>
                                 </v-card-actions>
@@ -63,7 +64,8 @@
                     </v-chip>
                 </template>
                 <template v-slot:item.products="{ item }">
-                    <v-chip v-if="Array.isArray(item.products)" v-for="p in item.products" size="x-small" color="primary">
+                    <v-chip v-if="Array.isArray(item.products)" v-for="p in item.products" size="x-small"
+                        color="primary">
                         {{ columnProducts(p) }}
                     </v-chip>
                     <div class="d-inline" v-if="!Array.isArray(item.products)" v-for="ps in item.products">
@@ -81,62 +83,66 @@
                 <template v-slot:form>
                     <v-card-text>
                         <v-container>
-                            <v-row>
-                                <v-col cols="6">
-                                    <v-text-field :rules="[rules.required]" v-model="editingMenu.date" :disabled="saving"
-                                        tabindex="2" type="date" label="Date"></v-text-field>
-                                </v-col>
-                                <v-col cols="6">
-                                    <v-select :rules="[rules.required]" v-model="editingMenu.username" :items="users"
-                                        :disabled="saving" item-title="username" item-value="username" tabindex="3"
-                                        label="User"></v-select>
-                                </v-col>
-                                <v-tabs v-if="partsOfDay.length > 0 && !Array.isArray(selectedProducts)"
-                                    v-for="partOfDay in partsOfDay" v-model="tab" color="deep-purple-accent-4"
-                                    align-tabs="center">
-                                    <v-tab :value="partOfDay">{{ partOfDay }}</v-tab>
-                                </v-tabs>
-                                <v-col v-if="partsOfDay.length > 0 && !Array.isArray(selectedProducts)" cols="12">
-                                    <v-window v-model="tab">
-                                        <v-window-item v-for="partOfDay in partsOfDay" :value="partOfDay">
+                            <v-skeleton-loader :loading="!settingsFinished" type="card">
+                                <v-row v-show="settingsFinished">
+                                    <v-col cols="6">
+                                        <v-text-field :rules="[rules.required]" v-model="editingMenu.date"
+                                            :disabled="saving" tabindex="2" type="date" label="Date"></v-text-field>
+                                    </v-col>
+                                    <v-col cols="6">
+                                        <v-select :rules="[rules.required]" v-model="editingMenu.username"
+                                            :items="users" :disabled="saving" item-title="username"
+                                            item-value="username" tabindex="3" label="User"></v-select>
+                                    </v-col>
+                                    <v-tabs v-if="partsOfDay.length > 0 && !Array.isArray(selectedProducts)"
+                                        v-for="partOfDay in partsOfDay" v-model="tab" color="deep-purple-accent-4"
+                                        align-tabs="center">
+                                        <v-tab :value="partOfDay">{{ partOfDay }}</v-tab>
+                                    </v-tabs>
+                                    <v-col v-if="partsOfDay.length > 0 && !Array.isArray(selectedProducts)" cols="12">
+                                        <v-window v-model="tab">
+                                            <v-window-item v-for="partOfDay in partsOfDay" :value="partOfDay">
 
-                                            <v-col cols="11">
-                                                <v-select v-model="selectedProducts[partOfDay]" :items="products"
-                                                    :disabled="saving" item-title="name" :return-object="true" itabindex="3"
-                                                    multiple label="Products"></v-select>
-                                            </v-col>
-                                            <v-divider></v-divider>
-                                            <v-col cols="12" v-for="product in selectedProducts[partOfDay]">
-                                                <v-text-field :rules="[rules.required]" v-model="product.name"
-                                                    :disabled="true" label="Name"></v-text-field>
-                                                <v-text-field type="number" :rules="[rules.required]"
-                                                    v-model="product.value" :disabled="saving" :suffix="getSuffix(product)"
-                                                    label="Value"></v-text-field>
-                                            </v-col>
-                                        </v-window-item>
-                                    </v-window>
-                                </v-col>
+                                                <v-col cols="11">
+                                                    <v-select v-model="selectedProducts[partOfDay]" :items="products"
+                                                        :disabled="saving" item-title="name" :return-object="true"
+                                                        itabindex="3" multiple label="Products"></v-select>
+                                                </v-col>
+                                                <v-divider></v-divider>
+                                                <v-col cols="12" v-for="product in selectedProducts[partOfDay]">
+                                                    <v-text-field :rules="[rules.required]" v-model="product.name"
+                                                        :disabled="true" label="Name"></v-text-field>
+                                                    <v-text-field type="number" :rules="[rules.required]"
+                                                        v-model="product.value" :disabled="saving"
+                                                        :suffix="getSuffix(product)" label="Value"></v-text-field>
+                                                </v-col>
+                                            </v-window-item>
+                                        </v-window>
+                                    </v-col>
 
-                                <!-- TODO: DELETE-->
-                                <v-col v-if="Array.isArray(selectedProducts)" cols="11">
-                                    <v-select v-model="editingMenu.recipes" :items="recipes" :disabled="saving"
-                                        item-title="name" item-value="name" tabindex="3" multiple
-                                        label="Recipes"></v-select>
-                                </v-col>
-                                <v-col v-if="Array.isArray(selectedProducts)" cols="11">
-                                    <v-select v-model="selectedProducts" :items="products" :disabled="saving"
-                                        item-title="name" :return-object="true" itabindex="3" multiple
-                                        label="Products"></v-select>
-                                </v-col>
-                                <v-divider v-if="Array.isArray(selectedProducts)"></v-divider>
-                                <v-col v-if="Array.isArray(selectedProducts)" cols="12" v-for="product in selectedProducts">
-                                    <v-text-field :rules="[rules.required]" v-model="product.name" :disabled="true"
-                                        label="Name"></v-text-field>
-                                    <v-text-field type="number" :rules="[rules.required]" v-model="product.value"
-                                        :disabled="saving" :suffix="getSuffix(product)" label="Value"></v-text-field>
-                                </v-col>
-                                <!-- END DELETE-->
-                            </v-row>
+                                    <!-- TODO: DELETE-->
+                                    <v-col v-if="Array.isArray(selectedProducts)" cols="11">
+                                        <v-select v-model="editingMenu.recipes" :items="recipes" :disabled="saving"
+                                            item-title="name" item-value="name" tabindex="3" multiple
+                                            label="Recipes"></v-select>
+                                    </v-col>
+                                    <v-col v-if="Array.isArray(selectedProducts)" cols="11">
+                                        <v-select v-model="selectedProducts" :items="products" :disabled="saving"
+                                            item-title="name" :return-object="true" itabindex="3" multiple
+                                            label="Products"></v-select>
+                                    </v-col>
+                                    <v-divider v-if="Array.isArray(selectedProducts)"></v-divider>
+                                    <v-col v-if="Array.isArray(selectedProducts)" cols="12"
+                                        v-for="product in selectedProducts">
+                                        <v-text-field :rules="[rules.required]" v-model="product.name" :disabled="true"
+                                            label="Name"></v-text-field>
+                                        <v-text-field type="number" :rules="[rules.required]" v-model="product.value"
+                                            :disabled="saving" :suffix="getSuffix(product)"
+                                            label="Value"></v-text-field>
+                                    </v-col>
+                                    <!-- END DELETE-->
+                                </v-row>
+                            </v-skeleton-loader>
                         </v-container>
                         <v-alert v-if="validationMessage != null" :text="validationMessage" type="error"
                             variant="tonal"></v-alert>
@@ -201,15 +207,20 @@ const getProducts = async () => {
         console.error('Error retrieving products');
     }
 };
+
 const getSettings = async () => {
     const response = await settingService.get('settings_v1');
 
     if (response.isOk) {
         partsOfDay.value = response.data.settings.partsOfDay.split(',');
+        selectedProducts.value = {};
     } else {
         console.error('Error retrieving settings');
     }
+
+    settingsFinished.value = true;
 };
+
 onMounted(() => {
     getRecipes();
     getUsers();
@@ -232,6 +243,7 @@ const params = ref({});
 const username = ref(null);
 const partsOfDay = ref([]);
 const tab = ref(null);
+const settingsFinished = ref(false);
 
 const selectedProducts = ref([]);
 const products = ref([]);
