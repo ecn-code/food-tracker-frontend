@@ -29,9 +29,9 @@
                                         label="Description"></v-text-field>
                                 </v-col>
                                 <v-col cols="6">
-                                    <v-select v-model="selectedProducts" @update:modelValue="selectProduct"
+                                    <v-combobox :closable-chips="true" :chips="true" v-model="selectedProducts" @update:modelValue="selectProduct"
                                         :items="products" :disabled="saving" :item-props="productProps" tabindex="3"
-                                        multiple label="Products"></v-select>
+                                        multiple label="Products"></v-combobox>
                                 </v-col>
                                 <v-divider></v-divider>
                                 <v-col cols="12" v-for="product in editedProducts">

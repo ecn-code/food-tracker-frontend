@@ -104,9 +104,9 @@
                                             <v-window-item v-for="partOfDay in partsOfDay" :value="partOfDay">
 
                                                 <v-col cols="11">
-                                                    <v-select v-model="selectedProducts[partOfDay]" :items="products"
+                                                    <v-combobox :closable-chips="true" :chips="true" v-model="selectedProducts[partOfDay]" :items="products"
                                                         :disabled="saving" item-title="name" :return-object="true"
-                                                        itabindex="3" multiple label="Products"></v-select>
+                                                        itabindex="3" multiple label="Products"></v-combobox>
                                                 </v-col>
                                                 <v-divider></v-divider>
                                                 <v-col cols="12" v-for="product in selectedProducts[partOfDay]">
