@@ -257,7 +257,7 @@ const add = () => {
 };
 
 const edit = () => {
-    if (!Array.isArray(editingMenu.value.products)) {
+    if (!Array.isArray(editingMenu.value.products) || !Array.isArray(selectedProducts.value)) {
         selectedProducts.value = {};
         Object.keys(editingMenu.value.products).forEach(partOfDay => {
             selectedProducts.value[partOfDay] = editingMenu.value.products[partOfDay].map(p => Object.assign({}, p));
@@ -283,7 +283,7 @@ const edit = () => {
 const save = () => {
     fillMenuId();
 
-    if (!Array.isArray(editingMenu.value.products)) {
+    if (!Array.isArray(editingMenu.value.products) || !Array.isArray(selectedProducts.value)) {
         editingMenu.value.products = {};
 
         Object.keys(selectedProducts.value).forEach(partOfDay => {
