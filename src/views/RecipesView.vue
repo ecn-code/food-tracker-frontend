@@ -22,16 +22,15 @@
                     <v-card-text>
                         <v-container>
                             <v-row>
-                                <v-col cols="6">
+                                <v-col cols="12">
                                     <v-text-field :rules="[rules.required]" v-model="editingRecipe.name" :disabled="saving"
                                         tabindex="2" label="Name"></v-text-field>
-                                    <v-text-field v-model="editingRecipe.description" :disabled="saving" tabindex="2"
-                                        label="Description"></v-text-field>
-                                </v-col>
-                                <v-col cols="6">
                                     <v-combobox :closable-chips="true" :chips="true" v-model="selectedProducts" @update:modelValue="selectProduct"
                                         :items="products" :disabled="saving" :item-props="productProps" tabindex="3"
                                         multiple label="Products"></v-combobox>
+                                </v-col>
+                                <v-col cols="12">
+                                    <v-textarea v-model="editingRecipe.description" :disabled="saving" tabindex="2" label="Receta" variant="outlined"></v-textarea>
                                 </v-col>
                                 <v-divider></v-divider>
                                 <v-col cols="12" v-for="product in editedProducts">
