@@ -2,10 +2,10 @@
     <LayoutBase>
         <template v-slot:content>
             <TableComponent v-model:loading="loading" v-model:reload="reload" v-model:item="editingProduct" v-model:validationMessage="validationMessage"
-                v-model:saving="saving" :emptyItem="{ nutritional_value: [], name: null, description: null }"
+                v-model:saving="saving" :emptyItem="{ nutritional_value: [], name: null, description: null }" :params="params" 
                 :headers="headers" :service="productService" :sort-by="[{ key: 'name', order: 'asc' }]" id-name="SK"
-                title="Products" @on-edit="edit" @before-save="save" @on-close="close"
-                :slot-cells="['item.nutritional_value']">
+                title="Products" @on-edit="edit" @before-save="save" @on-close="close" :paginated="true"
+                :slot-cells="['item.nutritional_value']" @after-get="afterGet">
 
                 <template v-slot:item.nutritional_value="{ item }">
                     <v-chip
@@ -19,6 +19,8 @@
                     <v-fade-transition>
                         <v-btn @click="reload = true" :disabled="loading" icon="mdi-reload"></v-btn>
                     </v-fade-transition>
+                    <v-text-field ref="searchField" lazy="true" :clearable="true" @update:modelValue="updateQuery" class="mt-5" v-model="query" type="text"
+                        :disabled="loading" label="Search" style="max-width: 200px"></v-text-field>
                 </template>
 
                 <template v-slot:form>
@@ -59,7 +61,7 @@
 import LayoutBase from '../layouts/LayoutBase.vue';
 import ProductService from '../services/ProductService';
 import TableComponent from '../components/TableComponent.vue';
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted, nextTick } from 'vue';
 import NutritionalValueService from '../services/NutritionalValueService';
 
 const productService = new ProductService;
@@ -98,6 +100,12 @@ const validationMessage = ref(null);
 const nutritionals = ref([]);
 const selectedNutritionalValues = ref([]);
 const editedNutritionalValues = ref([]);
+const query = ref('');
+const params = ref({
+    'items_per_page': 40
+});
+let updateQueryTimeout = null;
+const searchField = ref(null);
 
 const selectNutritionalValue = nutritionalValuesSelected => {
     const selected = [];
@@ -128,4 +136,28 @@ const close = () => {
     selectedNutritionalValues.value = [];
 }
 
+const updateQuery = queryValue => {
+    clearTimeout(updateQueryTimeout);
+
+    updateQueryTimeout = setTimeout(() => {
+        query.value = queryValue;
+        finishUpdateQuery();
+    }, 500);
+};
+
+const finishUpdateQuery = () => {
+    delete params.value['last_evaluated_key'];
+
+    if(query.value) {
+        params.value['query'] = query.value;
+    } else {
+        delete params.value['query'];
+    }
+
+    reload.value = true;
+};
+
+const afterGet = () => {
+    nextTick(() => searchField.value.focus());
+};
 </script>

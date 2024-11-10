@@ -1,5 +1,5 @@
 <template>
-    <v-data-table-virtual class="fill-height" @update:options="get" :loading="loading" :headers="headers" :items="items"
+    <v-data-table-virtual ref="dataTable" class="fill-height" @update:options="get" :loading="loading" :headers="headers" :items="items"
         :sort-by="sortBy">
         <template v-for="slotCell in slotCells" v-slot:[slotCell]="{ item }">
             <slot :name="slotCell" :item="item"></slot>
@@ -73,7 +73,7 @@
 </template>
 
 <script setup>
-import { ref, nextTick, computed, watch } from 'vue';
+import { ref, nextTick, computed, watch, onMounted } from 'vue';
 
 const dialog = ref(false);
 const dialogRemove = ref(false);
@@ -87,8 +87,12 @@ const items = ref([]);
 const item = defineModel('item');
 const reload = defineModel('reload');
 const loading = defineModel('loading');
+const dataTable = ref(null);
+const dataTableScroll = ref(null);
+let firstGetTime = true;
 
 const {
+    paginated,
     headers,
     service,
     sortBy,
@@ -99,6 +103,7 @@ const {
     canDuplicate,
     params
 } = defineProps({
+    paginated: { type: Boolean, required: false, default: false },
     headers: Array,
     service: Object,
     sortBy: Array,
@@ -116,18 +121,49 @@ const formTitle = computed(() => {
 const saveBtnText = computed(() => {
     return saving.value ? 'saving...' : 'save';
 });
-watch(reload, () => reload.value ? get() : '');
+watch(reload, () => {
+    if(reload.value) {
+        items.value = [];
+        get();
+    }
+});
+onMounted(() => {
+    if(paginated) {
+        dataTableScroll.value = dataTable.value.$el.querySelector('.v-table__wrapper');
+        dataTableScroll.value.addEventListener("scroll", onScroll);
+    }
+});
 
-const emit = defineEmits(['on-add', 'on-edit', 'on-duplicate', 'before-save', 'on-close', 'on-reset', 'before-remove']);
+const onScroll = () => {
+    const table = dataTableScroll.value;
+    if ((!params || !params['query']) && !loading.value && table.scrollTop + table.clientHeight == table.scrollHeight) {
+        get();
+    }
+};
+
+const emit = defineEmits(['on-add', 'on-edit', 'on-duplicate', 'before-save', 'on-close', 'on-reset', 'before-remove', 'after-get']);
 
 const get = async () => {
+    if(!reload.value && paginated && !firstGetTime && !params['last_evaluated_key']) {
+        return;
+    }
+
     loading.value = true;
 
     const response = await service.get(params);
     if (response.isOk) {
-        items.value = response.data.items;
+        if(response.data.last_evaluated_key) {
+            params['last_evaluated_key'] = JSON.stringify(response.data.last_evaluated_key);
+        } else {
+            delete params['last_evaluated_key'];
+        }
+        items.value.push(...response.data.items);
+
         loading.value = false;
         reload.value = false;
+        firstGetTime = false;
+
+        emit('after-get');
     }
 };
 

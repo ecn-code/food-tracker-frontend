@@ -23,7 +23,7 @@ export default class RecipeService extends Service {
         );
     };
 
-    get() {
+    get(params) {
         const userStore = useUserStore();
         const { user } = storeToRefs(userStore);
         const token = user.value.token;
@@ -36,7 +36,8 @@ export default class RecipeService extends Service {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
                 }
-            }
+            },
+            params
         );
     };
 

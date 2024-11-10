@@ -18,10 +18,14 @@ export default class Service {
             const userStore = useUserStore();
             const { logout } = userStore;
 
-            if (status == 419) {
+            if (status == 419 || status == 401) {
                 logout();
                 router.push({ name: 'login' });
                 return {};
+            }
+
+            if(status == 502) {
+                console.error("502!!!");
             }
 
             return {

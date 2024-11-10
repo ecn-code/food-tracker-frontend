@@ -3,11 +3,11 @@
         <template v-slot:content>
             <TableComponent v-model:loading="loading" v-model:reload="reload" v-model:item="editingMenu"
                 v-model:validationMessage="validationMessage" v-model:saving="saving"
-                :emptyItem="{ id: null, products: [], recipes: [], nutritional_value: [], username: null, date: null }"
+                :emptyItem="{ id: null, products: [], nutritional_value: [], username: null, date: null }"
                 :headers="headers" :service="menuService" :sort-by="[{ key: 'name', order: 'asc' }]" id-name="id"
                 :can-duplicate="true" title="Menus" @on-add="add" @on-edit="edit" @on-duplicate="edit"
                 @before-save="save" @on-close="close" @before-remove="remove" :params="params" @on-reset="reset"
-                :slot-cells="['item.nutritional_value', 'item.products', 'item.recipes']">
+                :slot-cells="['item.nutritional_value', 'item.products']">
 
                 <template v-slot:toolbar>
                     <v-fade-transition>
@@ -74,11 +74,6 @@
                         </v-chip>
                     </div>
                 </template>
-                <template v-slot:item.recipes="{ item }">
-                    <v-chip v-for="r in item.recipes" size="x-small" color="primary">
-                        {{ columnRecipes(r) }}
-                    </v-chip>
-                </template>
 
                 <template v-slot:form>
                     <v-card-text>
@@ -104,7 +99,7 @@
                                             <v-window-item v-for="partOfDay in partsOfDay" :value="partOfDay">
 
                                                 <v-col cols="11">
-                                                    <v-combobox :closable-chips="true" :chips="true" v-model="selectedProducts[partOfDay]" :items="products"
+                                                    <v-combobox @update:model-value="selectedProductsChanged" :closable-chips="true" :chips="true" v-model="selectedProducts[partOfDay]" :items="products"
                                                         :disabled="saving" item-title="name" :return-object="true"
                                                         itabindex="3" multiple label="Products"></v-combobox>
                                                 </v-col>
@@ -119,28 +114,6 @@
                                             </v-window-item>
                                         </v-window>
                                     </v-col>
-
-                                    <!-- TODO: DELETE-->
-                                    <v-col v-if="Array.isArray(selectedProducts)" cols="11">
-                                        <v-select v-model="editingMenu.recipes" :items="recipes" :disabled="saving"
-                                            item-title="name" item-value="name" tabindex="3" multiple
-                                            label="Recipes"></v-select>
-                                    </v-col>
-                                    <v-col v-if="Array.isArray(selectedProducts)" cols="11">
-                                        <v-select v-model="selectedProducts" :items="products" :disabled="saving"
-                                            item-title="name" :return-object="true" itabindex="3" multiple
-                                            label="Products"></v-select>
-                                    </v-col>
-                                    <v-divider v-if="Array.isArray(selectedProducts)"></v-divider>
-                                    <v-col v-if="Array.isArray(selectedProducts)" cols="12"
-                                        v-for="product in selectedProducts">
-                                        <v-text-field :rules="[rules.required]" v-model="product.name" :disabled="true"
-                                            label="Name"></v-text-field>
-                                        <v-text-field type="number" :rules="[rules.required]" v-model="product.value"
-                                            :disabled="saving" :suffix="getSuffix(product)"
-                                            label="Value"></v-text-field>
-                                    </v-col>
-                                    <!-- END DELETE-->
                                 </v-row>
                             </v-skeleton-loader>
                         </v-container>
@@ -155,15 +128,13 @@
 
 <script setup>
 import LayoutBase from '../layouts/LayoutBase.vue';
-import RecipeService from '../services/RecipeService';
 import TableComponent from '../components/TableComponent.vue';
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, nextTick } from 'vue';
 import MenuService from '../services/MenuService';
 import UserService from '../services/UserService';
 import ProductService from '../services/ProductService';
 import SettingService from '../services/SettingService';
 
-const recipeService = new RecipeService;
 const menuService = new MenuService;
 const userService = new UserService;
 const productService = new ProductService;
@@ -175,22 +146,12 @@ const rules = {
 const headers = [
     { title: 'User', key: 'username' },
     { title: 'Date', key: 'date' },
-    { title: 'Recipes', key: 'recipes' },
     { title: 'Products', key: 'products' },
     { title: 'Nutritional', key: 'nutritional_value' },
     { title: 'Actions', key: 'actions', sortable: false },
 ];
 const columnNutritionalValue = nv => `${nv.name}=${nv.value}${nv.unit}`;
 const columnProducts = p => `${p.name}=${p.value}${getSuffix(p)}`;
-const columnRecipes = r => `${r}`;
-const getRecipes = async () => {
-    const response = await recipeService.get();
-    if (response.isOk) {
-        recipes.value = response.data.items;
-    } else {
-        console.error('Error retrieving recipes');
-    }
-};
 const getUsers = async () => {
     const response = await userService.get();
     if (response.isOk) {
@@ -200,12 +161,25 @@ const getUsers = async () => {
     }
 };
 const getProducts = async () => {
-    const response = await productService.get();
-    if (response.isOk) {
-        products.value = response.data.items;
-    } else {
-        console.error('Error retrieving products');
-    }
+    products.value = [];
+    const productParams = {
+        'items_per_page': 40
+    };
+    
+    let response = null;
+    do {
+        response = await productService.get(productParams);
+        if (response.isOk) {
+            if(response.data.last_evaluated_key) {
+                productParams['last_evaluated_key'] = JSON.stringify(response.data.last_evaluated_key);
+            } else {
+                delete productParams['last_evaluated_key'];
+            }
+            products.value.push(...response.data.items);
+        } else {
+            console.error('Error retrieving products');
+        }
+    } while(response.isOk && productParams['last_evaluated_key']);
 };
 
 const getSettings = async () => {
@@ -222,7 +196,6 @@ const getSettings = async () => {
 };
 
 onMounted(() => {
-    getRecipes();
     getUsers();
     getProducts();
     getSettings();
@@ -231,7 +204,6 @@ onMounted(() => {
 const editingMenu = ref({});
 const saving = ref(false);
 const validationMessage = ref(null);
-const recipes = ref([]);
 const users = ref([]);
 const date = ref(null);
 const dialogBlockMenu = ref(false);
@@ -369,5 +341,17 @@ const getSuffix = product => {
     }
 
     return 'gr';
+};
+
+const selectedProductsChanged = value => {
+    const index = value.findIndex(v => typeof v === 'string');
+    if(index != -1) {
+        const text = value[index];
+        nextTick(() => {
+            Object.keys(selectedProducts.value).forEach(
+                partOfDay => selectedProducts.value[partOfDay] = selectedProducts.value[partOfDay].filter(product => product !== text)
+            );
+        });
+    }
 };
 </script>

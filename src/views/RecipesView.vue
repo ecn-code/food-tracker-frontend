@@ -2,9 +2,9 @@
     <LayoutBase>
         <template v-slot:content>
             <TableComponent v-model:loading="loading" v-model:reload="reload" v-model:item="editingRecipe" v-model:validationMessage="validationMessage"
-                v-model:saving="saving" :emptyItem="{ products: [], nutritional_value: [], name: null, description: null }"
-                :headers="headers" :service="recipeService" :sort-by="[{ key: 'name', order: 'asc' }]" id-name="SK"
-                title="Recipes" @on-edit="edit" @before-save="save" @on-close="close" :slot-cells="['item.nutritional_value']">
+                v-model:saving="saving" :emptyItem="{ products: [], nutritional_value: [], name: null, description: null }" :paginated="true"
+                :headers="headers" :service="recipeService" :sort-by="[{ key: 'name', order: 'asc' }]" id-name="SK" :params="params"
+                title="Recipes" @on-edit="edit" @before-save="save" @on-close="close" :slot-cells="['item.nutritional_value']" @after-get="afterGet">
 
                 <template v-slot:item.nutritional_value="{ item }">
                     <v-chip v-for="nv in item.nutritional_value" size="x-small" color="primary">
@@ -16,6 +16,8 @@
                     <v-fade-transition>
                         <v-btn @click="reload = true" :disabled="loading" icon="mdi-reload"></v-btn>
                     </v-fade-transition>
+                    <v-text-field ref="searchField" lazy="true" :clearable="true" @update:modelValue="updateQuery" class="mt-5" v-model="query" type="text"
+                        :disabled="loading" label="Search" style="max-width: 200px"></v-text-field>
                 </template>
 
                 <template v-slot:form>
@@ -82,7 +84,7 @@
 import LayoutBase from '../layouts/LayoutBase.vue';
 import RecipeService from '../services/RecipeService';
 import TableComponent from '../components/TableComponent.vue';
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, nextTick } from 'vue';
 import ProductService from '../services/ProductService';
 
 const recipeService = new RecipeService;
@@ -106,14 +108,29 @@ const productProps = product => {
     };
 };
 const columnNutritionalValue = nv => `${nv.name}=${nv.value}${nv.unit}`;
+
 const getProducts = async () => {
-    const response = await productService.get();
-    if (response.isOk) {
-        products.value = response.data.items;
-    } else {
-        console.error('Error retrieving products');
-    }
+    products.value = [];
+    const productParams = {
+        'items_per_page': 40
+    };
+    
+    let response = null;
+    do {
+        response = await productService.get(productParams);
+        if (response.isOk) {
+            if(response.data.last_evaluated_key) {
+                productParams['last_evaluated_key'] = JSON.stringify(response.data.last_evaluated_key);
+            } else {
+                delete productParams['last_evaluated_key'];
+            }
+            products.value.push(...response.data.items);
+        } else {
+            console.error('Error retrieving products');
+        }
+    } while(response.isOk && productParams['last_evaluated_key']);
 };
+
 onMounted(getProducts);
 
 const editingRecipe = ref({});
@@ -127,6 +144,12 @@ const editedProducts = ref([]);
 const dialogCreateProduct = ref(false);
 const recipeSelected = ref(null);
 const portions = ref(null);
+const query = ref('');
+const params = ref({
+    'items_per_page': 40
+});
+let updateQueryTimeout = null;
+const searchField = ref(null);
 
 const selectProduct = currentSelectedProducts => {
     const selected = [];
@@ -190,5 +213,32 @@ const getSuffix = product => {
   }
   
   return 'gr';
+};
+
+const updateQuery = queryValue => {
+    console.log(queryValue)
+    clearTimeout(updateQueryTimeout);
+
+    updateQueryTimeout = setTimeout(() => {
+        query.value = queryValue;
+        finishUpdateQuery();
+    }, 500);
+};
+
+const finishUpdateQuery = () => {
+    delete params.value['last_evaluated_key'];
+
+    if(query.value) {
+        params.value['query'] = query.value;
+    } else {
+        delete params.value['query'];
+    }
+    console.log(query.value)
+
+    reload.value = true;
+};
+
+const afterGet = () => {
+    nextTick(() => searchField.value.focus());
 };
 </script>
