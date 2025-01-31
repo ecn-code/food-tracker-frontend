@@ -99,8 +99,9 @@ const headers = [
     { title: 'Actions', key: 'actions', sortable: false },
 ];
 const productProps = product => {
-    if(!product.name) {
+    if(!product || !product.name) {
         console.error('Error con producto que posiblemente fue eliminado y esta asociado');
+        return;
     }
 
     return {
@@ -117,6 +118,7 @@ const getProducts = async () => {
     
     let response = null;
     do {
+        loading.value = true;
         response = await productService.get(productParams);
         if (response.isOk) {
             if(response.data.last_evaluated_key) {
@@ -129,6 +131,8 @@ const getProducts = async () => {
             console.error('Error retrieving products');
         }
     } while(response.isOk && productParams['last_evaluated_key']);
+
+    loading.value = false;
 };
 
 onMounted(getProducts);
@@ -216,7 +220,6 @@ const getSuffix = product => {
 };
 
 const updateQuery = queryValue => {
-    console.log(queryValue)
     clearTimeout(updateQueryTimeout);
 
     updateQueryTimeout = setTimeout(() => {
