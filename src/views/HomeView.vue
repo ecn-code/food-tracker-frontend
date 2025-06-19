@@ -170,7 +170,7 @@ const getSuffix = product => {
 };
 
 const getSettings = async () => {
-  const response = await settingService.get('settings_v1');
+  const response = await settingService.get('V2');
 
   if (response.isOk) {
     partsOfDay.value = response.data.partsOfDay.split(',');
