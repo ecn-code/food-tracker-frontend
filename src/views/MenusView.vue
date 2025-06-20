@@ -186,7 +186,7 @@ const getSettings = async () => {
     const response = await settingService.get('V2');
 
     if (response.isOk) {
-        partsOfDay.value = response.data.partsOfDay.split(',');
+        partsOfDay.value = response.data.partsOfDay;
         selectedProducts.value = {};
     } else {
         console.error('Error retrieving settings');

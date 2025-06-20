@@ -2,6 +2,8 @@ import Service from "./Service";
 import { useUserStore } from "../stores/user";
 import { storeToRefs } from 'pinia';
 
+const NUTRITIONAL_INFORMATION_PATH = '/nutritional-information';
+
 export default class NutritionalValueService extends Service {
 
     async get() {
@@ -9,7 +11,7 @@ export default class NutritionalValueService extends Service {
         const { user } = storeToRefs(userStore);
         const token = user.value.token;
         return await super.fetchData(
-            '/nutritional-values',
+            NUTRITIONAL_INFORMATION_PATH,
             {
                 method: 'GET',
                 headers: {
@@ -23,7 +25,7 @@ export default class NutritionalValueService extends Service {
 
     async add(unit) {
         return await this.fetchWithBody(
-            '/nutritional-values',
+            NUTRITIONAL_INFORMATION_PATH,
             'POST',
             JSON.stringify(unit)
         );
@@ -31,7 +33,7 @@ export default class NutritionalValueService extends Service {
 
     async edit(shortname, unit) {
         return await this.fetchWithBody(
-            '/nutritional-values/' + shortname,
+            `${NUTRITIONAL_INFORMATION_PATH}/${shortname}`,
             'PUT',
             JSON.stringify(unit)
         );
@@ -39,7 +41,7 @@ export default class NutritionalValueService extends Service {
 
     async remove(shortname) {
         return await this.fetchWithBody(
-            '/nutritional-values',
+            NUTRITIONAL_INFORMATION_PATH,
             'DELETE',
             JSON.stringify({ shortname: shortname })
         );
