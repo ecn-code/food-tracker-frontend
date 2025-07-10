@@ -60,11 +60,11 @@ export default class ProductService extends Service {
         );
     }
 
-    async edit(shortname, unit) {
+    async edit(id, product) {
         return await this.fetchWithBody(
-            this.RESOURCE + '/' + shortname,
+            this.RESOURCE + '/' + id,
             'PUT',
-            JSON.stringify(unit)
+            JSON.stringify(product)
         );
     }
 

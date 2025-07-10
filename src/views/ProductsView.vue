@@ -2,14 +2,14 @@
     <LayoutBase>
         <template v-slot:content>
             <TableComponent v-model:loading="loading" v-model:reload="reload" v-model:item="editingProduct" v-model:validationMessage="validationMessage"
-                v-model:saving="saving" :emptyItem="{ nutritional_value: [], name: null, description: null }" :params="params" 
-                :headers="headers" :service="productService" :sort-by="[{ key: 'name', order: 'asc' }]" id-name="SK"
-                title="Products" @on-edit="edit" @before-save="save" @on-close="close" :paginated="true"
-                :slot-cells="['item.nutritional_value']" @after-get="afterGet">
+                v-model:saving="saving" :emptyItem="{ nutritionalValues: [], name: null, description: null }" :params="params" 
+                :headers="headers" :service="productService" :sort-by="[{ key: 'name', order: 'asc' }]" id-name="id"
+                title="Products" @on-edit="edit" @before-save="beforeSave" @after-save="afterSave" @on-close="close" :paginated="true"
+                :slot-cells="['item.nutritionalValues']" @after-get="afterGet">
 
-                <template v-slot:item.nutritional_value="{ item }">
+                <template v-slot:item.nutritionalValues="{ item }">
                     <v-chip
-                        v-for="nv in item.nutritional_value.sort((n1, n2) => n1[0].toLowerCase().localeCompare(n2[0].toLowerCase()))"
+                        v-for="nv in item.nutritionalValues"
                         size="x-small" color="primary">
                         {{ columnNutritionalValue(nv) }}
                     </v-chip>
@@ -35,16 +35,22 @@
                                 </v-col>
                                 <v-col cols="6">
                                     <v-select v-model="selectedNutritionalValues"
-                                        @update:modelValue="selectNutritionalValue" :items="nutritionals" :disabled="saving"
-                                        :item-props="nutritionalProps" tabindex="3" multiple
+                                        @update:modelValue="selectNutritionalValue"
+                                        :items="nutritionals"
+                                        :disabled="saving"
+                                        :item-props="nutritionalProps"
+                                        item-value="id"
+                                        item-title="shortName"
+                                        tabindex="3"
+                                        multiple
                                         label="Nutritional Values"></v-select>
                                 </v-col>
                                 <v-divider></v-divider>
                                 <v-col cols="12" v-for="nutritionalValue in editedNutritionalValues">
-                                    <v-text-field :rules="[rules.required]" v-model="nutritionalValue[0]" :disabled="true"
+                                    <v-text-field :rules="[rules.required]" v-model="nutritionalValue.name" :disabled="true"
                                         label="Name"></v-text-field>
-                                    <v-text-field type="number" :rules="[rules.required]" v-model="nutritionalValue[2]"
-                                        :disabled="saving" :suffix="nutritionalValue[1]" label="Value"></v-text-field>
+                                    <v-text-field type="number" :rules="[rules.required]" v-model="nutritionalValue.value"
+                                        :disabled="saving" :suffix="nutritionalValue.unit" label="Value"></v-text-field>
                                 </v-col>
                             </v-row>
                         </v-container>
@@ -67,25 +73,25 @@ import NutritionalValueService from '../services/NutritionalValueService';
 const productService = new ProductService;
 const nutritionalValueService = new NutritionalValueService;
 const rules = {
-    required: value => !!value || 'Field is required',
+    required: value => value !== null && value !== undefined && value !== '' || 'Field is required',
 };
 const headers = [
     { title: 'Name', key: 'name' },
     { title: 'Description', key: 'description' },
-    { title: 'Nutritional', key: 'nutritional_value' },
+    { title: 'Nutritional', key: 'nutritionalValues' },
     { title: 'Actions', key: 'actions', sortable: false },
 ];
 const nutritionalProps = nutritional => {
     return {
-        title: nutritional.shortname,
-        subtitle: nutritional.name
+        title: nutritional.name,
+        subtitle: nutritional.shortName
     };
 };
-const columnNutritionalValue = nv => `${nv[0]}=${nv[2]}${nv[1]}`;
+const columnNutritionalValue = nv => `${nv.name}=${nv.value}${nv.unit}`;
 const getNutritionalValues = async () => {
     const response = await nutritionalValueService.get();
     if (response.isOk) {
-        nutritionals.value = response.data.items.sort((n1, n2) => n1.name.toLowerCase().localeCompare(n2.name.toLowerCase()));
+        nutritionals.value = response.data.items;
     } else {
         console.error('Error retrieving nutritionals');
     }
@@ -108,27 +114,34 @@ let updateQueryTimeout = null;
 const searchField = ref(null);
 
 const selectNutritionalValue = nutritionalValuesSelected => {
-    const selected = [];
-    nutritionalValuesSelected.forEach(nvSelected => {
-        const nutritionalValue = editedNutritionalValues.value.filter(nv => nv[0] == nvSelected.name);
-        if (nutritionalValue.length == 0) {
-            selected.push([nvSelected.name, nvSelected.unit, 0]);
-        } else {
-            selected.push([nutritionalValue[0][0], nutritionalValue[0][1], nutritionalValue[0][2]]);
+    editedNutritionalValues.value = nutritionalValuesSelected.map(id => {
+        const existing = editedNutritionalValues.value.find(nv => nv.id === id);
+        const nutritional = nutritionals.value.find(nv => nv.id === id);
+        if (existing) {
+            return existing;
         }
+
+        return {
+            ...nutritional,
+            value: nutritional?.value ?? null,
+            unit: nutritional?.unit ?? ''
+        };
     });
-    editedNutritionalValues.value = selected;
 };
 
 const edit = () => {
-    selectedNutritionalValues.value = editingProduct.value.nutritional_value
-        .map(nutritionalValue => nutritionals.value.filter(nv => nv.name == nutritionalValue[0])[0]);
-    editedNutritionalValues.value = editingProduct.value.nutritional_value
-        .map(nv => nv);
+    selectedNutritionalValues.value = editingProduct.value.nutritionalValues
+        .map(nutritionalValue => nutritionalValue.id);
+    editedNutritionalValues.value = editingProduct.value.nutritionalValues
+        .map(nv => ({ ...nv }));
 };
 
-const save = () => {
-    editingProduct.value.nutritional_value = editedNutritionalValues.value;
+const beforeSave = () => {
+    editingProduct.value.nutritionalValues = editedNutritionalValues.value;
+};
+
+const afterSave = () => {
+    
 };
 
 const close = () => {

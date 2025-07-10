@@ -31,19 +31,19 @@ export default class NutritionalValueService extends Service {
         );
     }
 
-    async edit(shortname, unit) {
+    async edit(id, unit) {
         return await this.fetchWithBody(
-            `${NUTRITIONAL_INFORMATION_PATH}/${shortname}`,
+            `${NUTRITIONAL_INFORMATION_PATH}/${id}`,
             'PUT',
             JSON.stringify(unit)
         );
     }
 
-    async remove(shortname) {
+    async remove(id) {
         return await this.fetchWithBody(
-            NUTRITIONAL_INFORMATION_PATH,
+            `${NUTRITIONAL_INFORMATION_PATH}/${id}`,
             'DELETE',
-            JSON.stringify({ shortname: shortname })
+            null
         );
     }
 

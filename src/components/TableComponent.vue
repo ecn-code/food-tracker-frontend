@@ -199,7 +199,7 @@ const save = async () => {
         const response = await service.edit(item.value[idName], item.value);
 
         if (response.isOk) {
-            const callback = () => items.value[findIndex(item.value[idName])] = item.value;
+            const callback = () => items.value[findIndex(item.value[idName])] = response.data;
             close(callback);
         } else {
             const message = response.data ? response.data.description : null;

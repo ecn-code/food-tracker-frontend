@@ -2,8 +2,8 @@
     <LayoutBase>
         <template v-slot:content>
             <TableComponent v-model:loading="loading" v-model:reload="reload" v-model:item="editingNutritional" v-model:validationMessage="validationMessage"
-                v-model:saving="saving" :emptyItem="{ shortname: null, name: null, unit: null }" :headers="headers"
-                :service="nutritionalValueService" :sort-by="[{ key: 'shortname', order: 'asc' }]" id-name="shortname"
+                v-model:saving="saving" :emptyItem="{ shortName: null, name: null, unit: null }" :headers="headers"
+                :service="nutritionalValueService" :sort-by="[{ key: 'shortName', order: 'asc' }]" id-name="id"
                 title="Nutritional Values">
 
                 <template v-slot:toolbar>
@@ -18,7 +18,7 @@
                             <v-row>
                                 <v-col cols="12" sm="6" md="4">
                                     <v-text-field :rules="[rules.required]" :disabled="saving"
-                                        v-model="editingNutritional.shortname" tabindex="1"
+                                        v-model="editingNutritional.shortName" tabindex="1"
                                         label="ShortName"></v-text-field>
                                 </v-col>
                                 <v-col cols="12" sm="6" md="4">
@@ -26,7 +26,7 @@
                                         :disabled="saving" tabindex="2" label="Name"></v-text-field>
                                 </v-col>
                                 <v-col cols="12" sm="6" md="4">
-                                    <v-select item-value="shortname" v-model="editingNutritional.unit" :items="units"
+                                    <v-select item-value="shortName" v-model="editingNutritional.unit" :items="units"
                                         :disabled="saving" :item-props="unitsProps" tabindex="3" label="Unit"></v-select>
                                 </v-col>
                             </v-row>
@@ -53,7 +53,7 @@ const rules = {
     required: value => !!value || 'Field is required',
 };
 const headers = [
-    { title: 'ShortName', key: 'shortname' },
+    { title: 'ShortName', key: 'shortName' },
     { title: 'Name', key: 'name' },
     { title: 'Unit', key: 'unit' },
     { title: 'Actions', key: 'actions', sortable: false },
@@ -78,7 +78,7 @@ onMounted(getUnits);
 
 const unitsProps = unit => {
     return {
-        title: unit.shortname,
+        title: unit.shortName,
         subtitle: unit.name
     };
 };
